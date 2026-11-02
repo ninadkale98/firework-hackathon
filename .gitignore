@@ -1,0 +1,10 @@
+.env
+data/
+bin/
+logs/
+questions/
+PLAN.md
+__pycache__/
+.pytest_cache/
+*.pyc
+.DS_Store
