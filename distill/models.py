@@ -113,10 +113,13 @@ def _completer(name: str):
         key, url = os.environ["FIREWORKS_API_KEY"], FIREWORKS_URL
     else:
         key, url = "ollama", OLLAMA_URL
-    return OpenAISchemaCompleter(
-        api_key=key, model=spec.model, base_url=url,
-        reasoning_effort=spec.effort, timeout_seconds=300.0,
-    )
+    from openai import AsyncOpenAI
+
+    # Built the way backend main builds it, then pointed at the right endpoint: works
+    # whether or not the backend's completer takes ``base_url`` itself.
+    comp = OpenAISchemaCompleter(api_key=key, model=spec.model, timeout_seconds=300.0)
+    comp._client = AsyncOpenAI(api_key=key, base_url=url, timeout=300.0)
+    return comp
 
 
 def cost(name: str, tokens_in: int, tokens_out: int) -> Optional[float]:

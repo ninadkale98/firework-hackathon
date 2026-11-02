@@ -81,3 +81,14 @@ PYTHONPATH=../../backend:. python -m distill.runs run --split test --models qwen
 PYTHONPATH=../../backend:. python -m distill.runs score && python -m distill.runs board
 PYTHONPATH=../../backend:. python -m distill.export --split train
 ```
+
+## Continuing on another machine
+
+The data (test set, training set, question bank, plan, logs) lives in a **private** repo, `ninadkale98/firework-hackathon-data`, because it contains interview answer keys. Its README has the full restore steps. In short:
+
+1. Clone this repo and `codepraxis-org/backend` (private) at commit `ccee1c5`, which the data was made with. Create the backend venv.
+2. Clone the data repo and unpack it into this folder with `zstd -d …`: `data/distill.db`, `data/export/*.jsonl`, `data/bank/`, `questions/`, `PLAN.md`.
+3. Create `.env` with `FIREWORKS_API_KEY` and `DISTILL_OPENAI_API_KEY` (never committed). Claude runs read `ANTHROPIC_API_KEY` from the backend's `.env`.
+4. Download `firectl` into `bin/` and recreate the `bin/fw` wrapper (commands in the data repo's README).
+
+Status and next steps: `MORNING.md`.
