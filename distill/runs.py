@@ -128,17 +128,9 @@ async def judge(split: str, models: List[str], sample: int, *, concurrency: int,
 
     conn = store.connect()
     recs = list(store.records(conn, split=split))
-    rng = random.Random(seed)
-    # Stratified by task and persona so every slice gets judged.
-    by = defaultdict(list)
-    for r in recs:
-        by[(r["task"], (r.get("buckets") or {}).get("persona", "-"))].append(r)
-    picked: List[Dict[str, Any]] = []
-    while len(picked) < min(sample, len(recs)):
-        for key in list(by):
-            if by[key]:
-                picked.append(by[key].pop(rng.randrange(len(by[key]))))
-    picked = picked[:sample]
+    # The same stratified sample ``run --run-sample`` uses, so the models that only
+    # answered the sample are judged on exactly the turns they answered.
+    picked = stratified(recs, sample)
     runs = _runs(conn, split)
     sem = asyncio.Semaphore(concurrency)
     done = Counter()
