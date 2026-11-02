@@ -149,14 +149,14 @@ async def judge(split: str, models: List[str], sample: int, *, concurrency: int,
                     res = await J.criteria_task(rec, out)
                     store.put_score(conn, rec["id"], model, "judge", res)
                     u = res.get("usage") or {}
-                    store.log_spend(conn, "openai", "gpt-5.4", "judge", u.get("in", 0), u.get("out", 0),
-                                    cost("gpt-5.4", u.get("in", 0), u.get("out", 0)))
+                    store.log_spend(conn, "openai", J.DEFAULT_MODEL, "judge", u.get("in", 0), u.get("out", 0),
+                                    cost(J.DEFAULT_MODEL, u.get("in", 0), u.get("out", 0)))
                 if pairwise and model != REFERENCE and not judged(rec["id"], model, "pairwise"):
                     res = await J.pairwise_task(rec, out, rec["interviewer"])
                     store.put_score(conn, rec["id"], model, "pairwise", res)
                     u = res.get("usage") or {}
-                    store.log_spend(conn, "openai", "gpt-5.4", "judge", u.get("in", 0), u.get("out", 0),
-                                    cost("gpt-5.4", u.get("in", 0), u.get("out", 0)))
+                    store.log_spend(conn, "openai", J.DEFAULT_MODEL, "judge", u.get("in", 0), u.get("out", 0),
+                                    cost(J.DEFAULT_MODEL, u.get("in", 0), u.get("out", 0)))
                 done["ok"] += 1
             except Exception:
                 done["error"] += 1

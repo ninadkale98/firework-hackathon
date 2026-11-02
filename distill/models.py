@@ -63,8 +63,39 @@ MODELS: Dict[str, ModelSpec] = {spec.name: spec for spec in (
 )}
 
 
+class _Retrying:
+    """Retries a completer on rate limits and transient server errors, with
+    exponential backoff, so one throttled call does not fail a whole session."""
+
+    def __init__(self, inner, attempts: int = 7):
+        self._inner = inner
+        self._attempts = attempts
+        self.model = getattr(inner, "model", None)
+
+    async def complete(self, **kw):
+        import asyncio
+        import random as _r
+
+        delay = 2.0
+        for n in range(self._attempts):
+            try:
+                return await self._inner.complete(**kw)
+            except Exception as exc:  # the SDKs' rate-limit / 5xx / timeout errors
+                text = f"{type(exc).__name__} {exc}"
+                transient = any(k in text for k in ("429", "RateLimit", "rate limit", "503", "502",
+                                                    "500", "Timeout", "timed out", "Overloaded", "529"))
+                if not transient or n == self._attempts - 1:
+                    raise
+                await asyncio.sleep(delay + _r.random() * delay)
+                delay = min(delay * 2, 60.0)
+
+
 def completer(name: str):
-    """The engine's completer for a model in ``MODELS``."""
+    """The engine's completer for a model in ``MODELS``, retrying on rate limits."""
+    return _Retrying(_completer(name))
+
+
+def _completer(name: str):
     spec = MODELS[name]
     if spec.provider == "anthropic":
         from app.services.interview.ai.anthropic_client import AnthropicSchemaCompleter

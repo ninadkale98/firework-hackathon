@@ -83,7 +83,7 @@ The judge (GPT-5.4) sees the mode's private context, the candidate's message and
 |---|---|---|
 | responds to the message | responds to the message | responds to the message |
 | no spoon-feeding | no teaching or reveal | **accurate** (technically correct) |
-| one question at a time | one question at a time | no solution dump |
+| – | one question at a time | no solution dump |
 | **fits the clock** | **grade justified** (level matches rubric vs evidence) | **teaches well** (grounded, checks understanding) |
 | right pressure | right pressure | **right action** (ADD_NOTE only when asked, SUGGEST_ASSESS when ready, REDIRECT fishing) |
 | tone and length | tone and length (never mentions time) | tone and length |
@@ -127,19 +127,24 @@ Every rate has a 95% bootstrap interval: 1,000 resamples of the turns. Overlappi
 ## 4. What we fixed while building this
 
 1. **Word-overlap leak checks were replaced by the AI judge.**
-   - The first leak check counted a withheld phrase as leaked when its words appeared near each other. It flagged Opus on 20 turns, almost all false alarms:
-     - the phrase "cannot be the thing" matched the single word "thing";
-     - Opus repeated numbers from the candidate's own log that also appear in the rubric.
-   - It is now used only as a conservative pre-filter on training data.
-2. **The time-up rule check was dropped.** At 0 s the schema only offers QUESTION_DONE, so no model can break it.
+   - The first check counted a withheld phrase as leaked when its words appeared near each other.
+   - It flagged Opus on 20 turns, almost all false alarms: "cannot be the thing" matched the single word "thing", and numbers from the candidate's own log also appear in the rubric.
+   - It is now only a conservative pre-filter on training data.
+2. **The time-up rule check was dropped.** At 0 s the schema only offers QUESTION_DONE.
 3. **The judge's context was fixed for Assess and Study.**
-   - It first read only the interview prompt's section names.
-   - On Assess it missed the rubric and the withheld list. On Study it saw almost nothing (only the security note and the move list).
-   - All Assess and Study verdicts were deleted and re-judged with each mode's own context and criteria. Interview verdicts were unaffected.
-4. **Mode-specific criteria.**
-   - Assess has no clock, so "fits the clock" became "grade justified".
-   - In Study, explaining is the job, so "no spoon-feeding" became "no solution dump", alongside "accurate", "teaches well" and "right action".
+   - It first read only the interview prompt's section names, so it missed the Assess rubric and withheld list, and saw almost nothing of Study.
+   - Each mode now gets its own context and criteria.
+   - Assess has no clock, so its criterion is "grade justified".
+   - For Study, explaining is the job, so the leak criterion is "no solution dump".
+4. **Opus was checked by hand as the ground truth, and the judge was fixed where it was wrong.** We read every Opus turn the judge marked down and found four judge bugs:
+   - **Private fields read as leaks.** The judge saw the whole move, including `evidence`, `gap` and write-ups, which go to the report and are never shown to the candidate. It is now shown `candidate_reads` (the only text the candidate sees) apart from the private fields, and told those can never leak.
+   - **An invented rule.** "One question at a time" was applied to interviews, but the interview prompt has no such rule (Assess does). It was removed for interviews; it had failed Opus on 49 of 100 interview turns.
+   - **Stage set-up counted as a leak.** When an interviewer closes a stage (PROBE, QUESTION_DONE) the stage is already graded, and the authored next stage often says what the team did. A leak now counts only while its stage is open. The judge is told so on each closing move, and code enforces it.
+   - **Invented quotes.** A "gave the answer away" verdict must quote text that actually appears in the reply (checked in code), otherwise it is discarded. Repeating the candidate's own idea is never a leak.
+
+   **Validation (98 turns, before the final run):** the judge scores Opus 4.63 / 4.63 / 4.30 (Interview / Assess / Study) and base Qwen3.5-9B 3.53 / 2.57 / 3.43. Opus's remaining mark-downs are real slips allowed by the prompts' own rules: two questions in one Assess turn, a reply cut off at the output limit, and a small exercise step handed over in Study.
 5. **"Same grade as Opus" was added for Assess**, the examiner's main output.
+6. **New measured column: "reveals answer when moving on".** It is not counted as a leak, because the stage is graded. But a weak model skips ahead and explains the answer, so it is measured separately.
 
 ## 5. Limits: read the numbers with these in mind
 
@@ -150,41 +155,37 @@ Every rate has a 95% bootstrap interval: 1,000 resamples of the turns. Overlappi
 - **Code runs in Learn are synthetic** (pass / fail / compile error), not compiled from the learner's code. No interview test question has runnable code.
 - **Opus is the reference, not ground truth.** A model can beat Opus on the judge, and some do on individual turns.
 
-## 6. Results (shared sample, 100 turns per mode)
+## 6. Results (final judge, shared sample: 100 turns per mode)
 
-**Quality** with its 95% interval, then **judge score (1–5)** and how often the judge prefers the model's reply or ties with Opus's (**win/tie**):
+The board compares the frontier reference, the open teacher that writes our training data, and our student. The teacher, DeepSeek V4.1 Flash, was chosen earlier from five open models (Kimi K3, Qwen 3.8 Max, DeepSeek V4.1 Flash, gpt-oss-120b, GLM 5.3), by the rule fixed before results:
+1. the licence allows training on its outputs;
+2. it gives answers away no more than Opus does, plus 2 points;
+3. best quality wins;
+4. on overlapping intervals, the cheaper model wins.
 
-| Model | Interview | Assess | Study | $ / turn (interview) |
-|---|---|---|---|---|
-| **Claude Opus 5** (reference) | 89% (85–92) · 4.11 | 90% (86–93) · 4.35 | 93% (90–96) · 4.47 | $0.062 |
-| GPT-5.4 | 91% · 4.26 · win/tie 61% | 92% · 4.38 · 48% | 94% · 4.64 · 68% | $0.023 |
-| Kimi K3 | 82% · 3.78 · 40% | 91% · 4.44 · 62% | 94% · 4.72 · 69% | $0.050 |
-| Qwen 3.8 Max | 85% · 3.84 · 60% | **94%** · 4.53 · 55% | 92% · 4.56 · 65% | $0.035 |
-| **DeepSeek V4.1 Flash** | **88%** · 4.08 · 54% | 89% · 4.24 · 46% | **95%** · 4.67 · 72% | **$0.0045** |
-| gpt-oss-120b | 79% · 3.63 · 42% | 86% · 3.93 · 33% | 86% · 3.98 · 30% | $0.0014 |
-| **Qwen3.5-9B base (student)** | **68%** · 2.91 · **14%** | **70%** · 2.87 · **7%** | **82%** · 3.34 · **14%** | GPU-hour |
-
-Where base Qwen3.5-9B falls short of Opus:
-
-| | Interview | Assess | Study |
+| | Claude Opus 5 (reference) | DeepSeek V4.1 Flash (teacher) | Qwen3.5-9B base (student) |
 |---|---|---|---|
-| Rules kept (Opus → base 9B) | 85% → **48%** | 83% → **52%** | 90% → 79% |
-| Gives answer away | 11% → **46%** | 16% → **46%** | 6% → 10% |
-| Same move as Opus | **38%** | **47%** | 41% |
-| Same grade as Opus (Assess) | | **68%** (DeepSeek 97%) | |
-| Same move on messy English | Opus 93% → **43%** | | |
+| **Quality, all modes** | 95% (93–96) | 96% (95–97) | **81% (79–83)** |
+| Judge score 1–5 | 4.54 | 4.62 | **3.16** |
+| Judge prefers it or ties vs Opus | – | 57% | **12%** |
+| Rules kept | 94% | 95% | **80%** |
+| Gives answer away | 3% | 1% | **11%** (interview **21%**) |
+| Reveals answer when moving on | 2% | 5% | **39%** |
+| Resists answer-fishing / injection | 85% | 83% | **52%** |
+| Same move as Opus | – | 64% | **42%** |
+| Same grade as Opus (Assess) | – | 97% | **68%** |
+| Same move on messy English | 93% | 83% | **43%** |
+| $ per turn (interview) | $0.062 | $0.0045 | GPU-hour |
+
+By mode (quality · judge · win/tie vs Opus):
+
+| Mode | Opus | DeepSeek V4.1 Flash | Qwen3.5-9B base |
+|---|---|---|---|
+| Interview | 96% · 4.65 | 96% · 4.71 · 56% | **77% · 3.20 · 9%** |
+| Assess | 96% · 4.56 | 97% · 4.55 · 46% | **82% · 2.93 · 9%** |
+| Study | 92% · 4.41 | 95% · 4.60 · 68% | **83% · 3.36 · 19%** |
 
 **Reading it:**
-- **Training is needed.** Base Qwen keeps valid JSON (99%) but gives the answer away on almost half of interview and Assess turns, agrees with Opus's move under half the time, grades a third of Assess stages differently, and flips its decision on messy English more than half the time.
-- **Study is the smallest gap**, Interview and Assess the largest.
-- **An open model already matches Opus.** DeepSeek V4.1 Flash is within Opus's interval in every mode, at 4–14× lower cost per turn. That makes it a sound teacher.
-
-**Teacher picked by the rule fixed before the results (PLAN.md §10e):**
-
-| Mode | Teacher | Why |
-|---|---|---|
-| Interview | **DeepSeek V4.1 Flash** | Kimi K3 (28%) and gpt-oss (36%) give the answer away more than Opus + 2 points (13%), so they are gated out. DeepSeek has the best quality of the rest |
-| Assess | **DeepSeek V4.1 Flash** | Kimi K3 has higher quality, but the intervals overlap (87–94 vs 85–93), so the tie goes to the cheaper model. Grade agreement is equal at 97% |
-| Study | **DeepSeek V4.1 Flash** | best quality |
-
-Qwen 3.8 Max scores best on Assess, but its licence for training on its outputs is unverified, so it stays a comparison model only.
+- **The open teacher is at Opus level** in every mode, at about 14× lower cost per interview turn.
+- **The untrained 9B is not.** It gives answers away (most of all in interviews), skips ahead and explains the answer on 39% of stage closings, gives in to answer-fishing and injection half the time, grades a third of Assess stages differently from Opus, and changes its decision on messy English more than half the time.
+- That gap is what the fine-tuning on the teacher's data has to close. The tuned model is scored on these same turns with the same judge.

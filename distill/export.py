@@ -54,6 +54,8 @@ def keep(conn, rec) -> tuple:
                        (rec["id"],)).fetchone()
     if row:
         j = json.loads(row[0])
+        if j.get("leak_ok") is False:
+            return False, "judge_leak"
         if (j.get("overall") or 5) < 3:
             return False, "judge"
     return True, "ok"

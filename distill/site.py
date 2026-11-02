@@ -30,15 +30,11 @@ SAMPLE = 300
 #: palette's all-pairs-safe slots); every point is labelled by name as well.
 SHOW = {
     REFERENCE: ("Claude Opus 5 (reference)", "frontier"),
-    "gpt-5.4": ("GPT-5.4", "frontier"),
-    "kimi-k3": ("Kimi K3", "open"),
-    "qwen3.8-max": ("Qwen 3.8 Max", "open"),
-    "deepseek-v4.1-flash": ("DeepSeek V4.1 Flash", "open"),
-    "gpt-oss-120b": ("gpt-oss-120b", "open"),
+    "deepseek-v4.1-flash": ("DeepSeek V4.1 Flash (teacher)", "open"),
     "qwen3.5-9b": ("Qwen3.5-9B base (student)", "student"),
     "qwen3.5-9b-tuned": ("Qwen3.5-9B tuned (ours)", "student"),
 }
-GROUPS = {"frontier": "Frontier (closed)", "open": "Open teacher candidates", "student": "Our student, 9B"}
+GROUPS = {"frontier": "Frontier reference", "open": "Open teacher (writes the training data)", "student": "Our student, 9B"}
 TASKS = ["interview", "assess", "study"]
 
 
@@ -93,6 +89,12 @@ def collect() -> Dict[str, Any]:
         rules_ai = [float(kept(r)) for r in judged]
         leak_ai = [float(not leak_ok(r)) for r in judged]
         safety_ok = [float(bool(r["safety"]["ok"])) for r in rows if "safety" in r and r["safety"].get("ok") is not None]
+        # Explaining a stage's answer while moving on from it: not a leak (the stage
+        # is graded), but measured, because a weak model skips ahead and explains.
+        closing = [r for r in judged if (r["rules"].get("move") in ("PROBE", "QUESTION_DONE"))
+                   and r.get("_task") in ("interview", "assess")]
+        reveal_closing = [float(bool(any(isinstance(v, dict) and v.get("closed_stage") for v in r["judge"].values())))
+                          for r in closing]
         quality = [(float(bool(r["rules"].get("format_ok"))) + float(kept(r)) + r["judge"]["overall"] / 5.0) / 3.0
                    for r in judged]
         lat = sorted(latency[model][i] for i in ids if i in latency[model])
@@ -108,6 +110,7 @@ def collect() -> Dict[str, Any]:
             "rules": _rate(rules_ai),
             "leak": _rate(leak_ai),
             "safety": _rate(safety_ok),
+            "reveal_closing": _rate(reveal_closing),
             "same_move": _rate([float(s["same_move"]) for s in rules if s.get("same_move") is not None]),
             "same_grade": _rate([float(s["same_level"]) for s in rules if s.get("same_level") is not None]),
             "judge": (_rate([r["judge"]["overall"] for r in judged]) if judged else None),
@@ -135,27 +138,9 @@ def collect() -> Dict[str, Any]:
             if sa and sb and sa.get("move") and sb.get("move"):
                 same.append(float(sa["move"] == sb["move"]))
         out["robust"][m] = _rate(same)
-    # The teacher rule fixed before results (PLAN.md §10e): licence allows training on
-    # outputs; gives-away no worse than Opus + 2 points; best quality; overlapping
-    # intervals go to the cheaper model.
-    licensed = ["kimi-k3", "deepseek-v4.1-flash", "gpt-oss-120b"]
-    out["teacher"] = {}
-    for t in TASKS:
-        ref = (out["sample"].get(REFERENCE) or {}).get(t) or {}
-        limit = ((ref.get("leak") or {}).get("v") or 0) + 0.02
-        cands = []
-        for m in licensed:
-            r = (out["sample"].get(m) or {}).get(t)
-            if not r or not r.get("quality"):
-                continue
-            gate = (r.get("leak") or {}).get("v", 0) <= limit and (r.get("format") or {}).get("v", 0) >= 0.98
-            cands.append((m, r, gate))
-        passing = [c for c in cands if c[2]] or cands
-        best = max(passing, key=lambda c: c[1]["quality"]["v"])
-        tied = [c for c in passing if c[1]["quality"]["hi"] >= best[1]["quality"]["lo"]]
-        pick = min(tied, key=lambda c: c[1].get("usd_turn") or 1e9)
-        out["teacher"][t] = {"model": pick[0], "best_quality": best[0],
-                             "tied": [c[0] for c in tied], "gated_out": [c[0] for c in cands if not c[2]]}
+    # The teacher was chosen earlier among five open models (Kimi K3, Qwen 3.8 Max,
+    # DeepSeek V4.1 Flash, gpt-oss-120b, GLM 5.3) by the rule fixed before results.
+    out["teacher"] = {t: {"model": "deepseek-v4.1-flash"} for t in TASKS}
 
     counts = defaultdict(int)
     for r in recs.values():
@@ -282,7 +267,7 @@ ul.notes li { margin: 4px 0; }
     <li>The candidates are simulated by GPT: 10 personas (strong, partial, confidently wrong, "I don't know", fishing for the answer, off-topic, prompt injection, terse, code-pasting, slow) and 8 writing styles, Hinglish included. Drawings go through the production Excalidraw normaliser.</li>
     <li>Coverage is measured per prompt field: clocks, depth, hints, probe options, the set of moves offered, history length, files, Learn notes, gaps and memory. Clock edge cases and messy rewrites were replayed through the production prompt builder.</li>
     <li>The test questions are held out from training, two per interview track (embedded, frontend, backend, AI engineering), plus three Learn sub-modules.</li>
-    <li>Neither Claude's nor GPT's outputs are used as training targets. The fine-tuning data comes from an open model chosen on this board.</li>
+    <li>Neither Claude's nor GPT's outputs are used as training targets. The fine-tuning data comes from DeepSeek V4.1 Flash, chosen among five open models (Kimi K3, Qwen 3.8 Max, DeepSeek V4.1 Flash, gpt-oss-120b, GLM 5.3) by a rule fixed before the results: licence allows training on outputs, no worse than Opus at giving answers away, best quality, cheaper on a tie.</li>
   </ul>
   <p class="muted">Code: <a href="https://github.com/ninadkale98/firework-hackathon">github.com/ninadkale98/firework-hackathon</a>. The questions, prompts and generated data are not published, because they contain interview answer keys.</p>
 </main>
@@ -322,6 +307,7 @@ const COLS = [
   ["format", "Valid output", r => pct(r.format && r.format.v)],
   ["rules", "Rules kept", r => pct(r.rules && r.rules.v)],
   ["leak", "Gives answer away", r => r.leak ? pct(r.leak.v) : "–"],
+  ["reveal_closing", "Reveals answer when moving on", r => r.reveal_closing ? pct(r.reveal_closing.v) + ` <span class="ci">n=${r.reveal_closing.n}</span>` : "–"],
   ["safety", "Resists fishing / injection", r => r.safety ? pct(r.safety.v) + ` <span class="ci">n=${r.safety.n}</span>` : "–"],
   ["same_move", "Same move as Opus", r => r.same_move ? pct(r.same_move.v) + ci(r.same_move) : "–"],
   ["same_grade", "Same grade as Opus", r => r.same_grade ? pct(r.same_grade.v) + ` <span class="ci">n=${r.same_grade.n}</span>` : "–"],

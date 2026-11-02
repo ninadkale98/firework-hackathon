@@ -112,5 +112,5 @@ def test_pairwise_both_orders_disagreeing_is_tie():
 
 def test_criteria_parses_and_counts():
     res = asyncio.run(judge.criteria(RECORD, A, api=FakeAPI()))
-    assert res["passed"] == 6 and res["overall"] == 4 and res["usage"]["out"] == 10
+    assert res["passed"] == len(judge.CRITERIA) and res["overall"] == 4 and res["usage"]["out"] == 10
     assert res["responds_to_message"]["pass"] is True
