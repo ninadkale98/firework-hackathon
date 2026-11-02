@@ -134,28 +134,29 @@ async def judge(split: str, models: List[str], sample: int, *, concurrency: int,
     runs = _runs(conn, split)
     sem = asyncio.Semaphore(concurrency)
     done = Counter()
+    prov = _judge_provider(J)
 
     def judged(rid, model, kind):
         return conn.execute("select 1 from scores where record_id=? and model=? and kind=?",
-                            (rid, model, kind)).fetchone() is not None
+                            (rid, model, J.kind(kind))).fetchone() is not None
 
     async def one(rec, model, out):
         async with sem:
-            if store.spent(conn, "openai") >= cap:
+            if store.spent(conn, prov) >= cap:
                 done["cap"] += 1
                 return
             try:
                 if not judged(rec["id"], model, "judge"):
                     res = await J.criteria_task(rec, out)
-                    store.put_score(conn, rec["id"], model, "judge", res)
+                    store.put_score(conn, rec["id"], model, J.kind("judge"), res)
                     u = res.get("usage") or {}
-                    store.log_spend(conn, MODELS[J.DEFAULT_MODEL].provider if J.DEFAULT_MODEL in MODELS else "openai", J.DEFAULT_MODEL, "judge", u.get("in", 0), u.get("out", 0),
+                    store.log_spend(conn, prov, J.DEFAULT_MODEL, "judge", u.get("in", 0), u.get("out", 0),
                                     cost(J.DEFAULT_MODEL, u.get("in", 0), u.get("out", 0)))
                 if pairwise and model != REFERENCE and not judged(rec["id"], model, "pairwise"):
                     res = await J.pairwise_task(rec, out, rec["interviewer"])
-                    store.put_score(conn, rec["id"], model, "pairwise", res)
+                    store.put_score(conn, rec["id"], model, J.kind("pairwise"), res)
                     u = res.get("usage") or {}
-                    store.log_spend(conn, MODELS[J.DEFAULT_MODEL].provider if J.DEFAULT_MODEL in MODELS else "openai", J.DEFAULT_MODEL, "judge", u.get("in", 0), u.get("out", 0),
+                    store.log_spend(conn, prov, J.DEFAULT_MODEL, "judge", u.get("in", 0), u.get("out", 0),
                                     cost(J.DEFAULT_MODEL, u.get("in", 0), u.get("out", 0)))
                 done["ok"] += 1
             except Exception:
@@ -170,7 +171,11 @@ async def judge(split: str, models: List[str], sample: int, *, concurrency: int,
             if out and out.get("move"):
                 jobs.append(one(rec, m, out))
     await asyncio.gather(*jobs)
-    print("judge:", dict(done), "openai spend", round(store.spent(conn, "openai"), 2))
+    print("judge:", dict(done), f"{prov} spend", round(store.spent(conn, prov), 2))
+
+
+def _judge_provider(J) -> str:
+    return MODELS[J.DEFAULT_MODEL].provider if J.DEFAULT_MODEL in MODELS else "openai"
 
 
 def attempt_turn(rec: Dict[str, Any]) -> bool:
@@ -196,18 +201,19 @@ async def safety(split: str, models: List[str], sample: int, *, concurrency: int
     runs = _runs(conn, split)
     sem = asyncio.Semaphore(concurrency)
     done = Counter()
+    prov = _judge_provider(J)
 
     async def one(rec, model, out):
         async with sem:
-            if conn.execute("select 1 from scores where record_id=? and model=? and kind='safety'",
-                            (rec["id"], model)).fetchone() or store.spent(conn, "openai") >= cap:
+            if conn.execute("select 1 from scores where record_id=? and model=? and kind=?",
+                            (rec["id"], model, J.kind("safety"))).fetchone() or store.spent(conn, prov) >= cap:
                 return
             try:
                 res = await J.safety_task(rec, out)
-                store.put_score(conn, rec["id"], model, "safety", res)
+                store.put_score(conn, rec["id"], model, J.kind("safety"), res)
                 u = res.get("usage") or {}
-                store.log_spend(conn, "openai", "gpt-5.4", "judge:safety", u.get("in", 0), u.get("out", 0),
-                                cost("gpt-5.4", u.get("in", 0), u.get("out", 0)))
+                store.log_spend(conn, prov, J.DEFAULT_MODEL, "judge:safety", u.get("in", 0), u.get("out", 0),
+                                cost(J.DEFAULT_MODEL, u.get("in", 0), u.get("out", 0)))
                 done["ok"] += 1
             except Exception:
                 done["error"] += 1
@@ -222,22 +228,26 @@ async def safety(split: str, models: List[str], sample: int, *, concurrency: int
                 jobs.append(one(rec, m, out))
     print(f"{len(picked)} attempt turns in the sample, {len(jobs)} judge calls")
     await asyncio.gather(*jobs)
-    print("safety:", dict(done), "openai spend", round(store.spent(conn, "openai"), 2))
+    print("safety:", dict(done), f"{prov} spend", round(store.spent(conn, prov), 2))
 
 
 def board(split: str) -> Dict[str, Any]:
+    from distill import judge as J
+
     conn = store.connect()
     recs = {r["id"]: r for r in store.records(conn, split=split)}
     rows: Dict[str, Dict[str, List[Dict[str, Any]]]] = defaultdict(lambda: defaultdict(list))
     extra: Dict[str, Dict[str, Dict[str, Any]]] = defaultdict(lambda: defaultdict(dict))
+    raw: Dict[str, Dict[str, Dict[str, Any]]] = defaultdict(lambda: defaultdict(dict))
     for rid, model, kind, doc in conn.execute("select record_id, model, kind, doc from scores"):
-        if rid not in recs:
-            continue
-        d = json.loads(doc)
-        if kind == "rules":
-            rows[model][recs[rid]["task"]].append(d)
-        else:
-            extra[model][rid][kind] = d
+        if rid in recs:
+            raw[model][rid][kind] = json.loads(doc)
+    for model, by_rid in raw.items():
+        for rid, kinds in by_rid.items():
+            kinds = J.judge_kinds(kinds)
+            if "rules" in kinds:
+                rows[model][recs[rid]["task"]].append(kinds.pop("rules"))
+            extra[model][rid].update(kinds)
     out: Dict[str, Any] = {}
     for model, by_task in rows.items():
         out[model] = {}
@@ -307,11 +317,15 @@ def main(argv=None):
                         sample=a.run_sample))
     elif a.what == "score":
         score(a.split)
-    elif a.what == "judge":
-        asyncio.run(judge(a.split, a.models, a.sample, concurrency=a.concurrency,
-                          cap=a.cap_openai, pairwise=a.pairwise, seed=a.seed))
-    elif a.what == "safety":
-        asyncio.run(safety(a.split, a.models, a.sample, concurrency=a.concurrency, cap=a.cap_openai))
+    elif a.what in ("judge", "safety"):
+        from distill import judge as J
+
+        cap = caps[_judge_provider(J)] if _judge_provider(J) in caps else a.cap_openai
+        if a.what == "judge":
+            asyncio.run(judge(a.split, a.models, a.sample, concurrency=a.concurrency,
+                              cap=cap, pairwise=a.pairwise, seed=a.seed))
+        else:
+            asyncio.run(safety(a.split, a.models, a.sample, concurrency=a.concurrency, cap=cap))
     else:
         board(a.split)
 

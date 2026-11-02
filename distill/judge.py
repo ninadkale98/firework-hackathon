@@ -34,6 +34,27 @@ except ImportError:  # pragma: no cover
 
 DEFAULT_MODEL = os.getenv("DISTILL_JUDGE_MODEL", "gpt-5.4")
 
+#: Score kinds carry the judge's name unless it is the original GPT-5.4 judge, so
+#: verdicts from two judges are never mixed in one comparison.
+#: DeepSeek uses ``_ds``, the suffix ``scripts/judge_ds.py`` already stores.
+KIND_SUFFIX = {"gpt-5.4": "", "deepseek-v4.1-flash": "_ds"}.get(DEFAULT_MODEL, f"@{DEFAULT_MODEL}")
+JUDGE_KINDS = ("judge", "pairwise", "safety")
+
+
+def kind(base: str) -> str:
+    """The stored score kind for ``judge`` / ``pairwise`` / ``safety`` under this judge."""
+    return base + KIND_SUFFIX
+
+
+def judge_kinds(rows: Dict[str, Any]) -> Dict[str, Any]:
+    """One record's scores with this judge's verdicts under their plain names
+    (``judge``, ``pairwise``, ``safety``) and every other judge's dropped."""
+    out = {k: v for k, v in rows.items() if not k.startswith(JUDGE_KINDS)}
+    for base in JUDGE_KINDS:
+        if kind(base) in rows:
+            out[base] = rows[kind(base)]
+    return out
+
 CRITERIA = (
     "responds_to_message",
     "no_spoon_feeding",

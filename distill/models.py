@@ -59,6 +59,16 @@ MODELS: Dict[str, ModelSpec] = {spec.name: spec for spec in (
     ModelSpec("qwen3.5-9b", "fireworks",
               os.getenv("DISTILL_STUDENT_DEPLOYMENT", "accounts/fireworks/models/qwen3p5-9b"),
               None, None, "on-demand H100 ~$8/h"),
+    # SFT LoRA (codepraxis-interviewer-sft-v1), live-merged on the base's B200 shape.
+    ModelSpec("qwen3.5-9b-tuned", "fireworks",
+              "accounts/ninadnar98-z0upz59iv/models/codepraxis-interviewer-v1"
+              "#accounts/ninadnar98-z0upz59iv/deployments/codepraxis-interviewer-v1",
+              None, None, "on-demand B200, same shape as the base"),
+    # DPO on top of the SFT LoRA (codepraxis-interviewer-dpo-v1), same shape.
+    ModelSpec("qwen3.5-9b-dpo", "fireworks",
+              "accounts/ninadnar98-z0upz59iv/models/codepraxis-interviewer-dpo-v1"
+              "#accounts/ninadnar98-z0upz59iv/deployments/codepraxis-interviewer-dpo-v1",
+              None, None, "on-demand B200, same shape as the base"),
     ModelSpec("qwen3-8b-local", "ollama", "qwen3-8b-32k", None, (0.0, 0.0)),
 )}
 

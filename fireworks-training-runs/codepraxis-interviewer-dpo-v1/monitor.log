@@ -1,0 +1,15 @@
+14:14:40 JOB_STATE_RUNNING pct=None msg=
+14:16:41 JOB_STATE_RUNNING pct=None msg=0% complete | Epoch 1/1 | provisioning
+14:18:41 JOB_STATE_RUNNING pct=None msg=0% complete | Epoch 1/1 | provisioning
+14:20:41 JOB_STATE_RUNNING pct=None msg=0% complete | Epoch 1/1 | training
+14:22:41 JOB_STATE_RUNNING pct=None msg=0% complete | Epoch 1/1 | rendering/ref cache (9%)
+14:24:41 JOB_STATE_RUNNING pct=None msg=5% complete | Epoch 1/1 | training
+14:26:41 JOB_STATE_RUNNING pct=None msg=7% complete | Epoch 1/1 | training
+14:28:42 JOB_STATE_RUNNING pct=None msg=0% complete | Epoch 1/1 | rendering/ref cache (34%)
+14:30:42 JOB_STATE_RUNNING pct=None msg=11% complete | Epoch 1/1 | training
+14:32:42 JOB_STATE_RUNNING pct=None msg=0% complete | Epoch 1/1 | rendering/ref cache (49%)
+14:34:43 JOB_STATE_RUNNING pct=None msg=15% complete | Epoch 1/1 | training
+14:36:43 JOB_STATE_RUNNING pct=None msg=17% complete | Epoch 1/1 | training
+14:38:44 JOB_STATE_RUNNING pct=None msg=19% complete | Epoch 1/1 | training
+14:40:44 JOB_STATE_RUNNING pct=None msg=22% complete | Epoch 1/1 | training
+14:42:44 JOB_STATE_RUNNING pct=None msg=23% complete | Epoch 1/1 | training

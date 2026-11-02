@@ -19,6 +19,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
+from distill import judge as J
 from distill import store
 from distill.models import MODELS, cost
 from distill.runs import REFERENCE, stratified
@@ -33,6 +34,7 @@ SHOW = {
     "deepseek-v4.1-flash": ("DeepSeek V4.1 Flash (teacher)", "open"),
     "qwen3.5-9b": ("Qwen3.5-9B base (student)", "student"),
     "qwen3.5-9b-tuned": ("Qwen3.5-9B tuned (ours)", "student"),
+    "qwen3.5-9b-dpo": ("Qwen3.5-9B tuned + DPO (ours)", "student"),
 }
 GROUPS = {"frontier": "Frontier reference", "open": "Open teacher (writes the training data)", "student": "Our student, 9B"}
 TASKS = ["interview", "assess", "study"]
@@ -53,6 +55,9 @@ def collect() -> Dict[str, Any]:
     for rid, model, kind, doc in conn.execute("select record_id, model, kind, doc from scores"):
         if rid in recs:
             scores[model][rid][kind] = json.loads(doc)
+    for by_rid in scores.values():
+        for rid in list(by_rid):
+            by_rid[rid] = J.judge_kinds(by_rid[rid])
     latency: Dict[str, Dict[str, float]] = defaultdict(dict)
     for rid, model, doc in conn.execute("select record_id, model, doc from runs"):
         d = json.loads(doc)
