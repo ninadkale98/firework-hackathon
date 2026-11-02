@@ -7,3 +7,10 @@
   600/1483 errors=0
   700/1483 errors=0
   800/1483 errors=0
+  900/1483 errors=0
+  1000/1483 errors=0
+  1100/1483 errors=0
+  1200/1483 errors=0
+  1300/1483 errors=0
+  1400/1483 errors=0
+done: {'ok': 1483} deepseek judge spend $ 13.1

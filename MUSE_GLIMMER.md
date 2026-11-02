@@ -2,7 +2,7 @@
 
 A second student, trained alongside the Qwen3.5-9B run: **Muse Glimmer 30B + LoRA**, fine-tuned on the same training export and evaluated on the same frozen test set with the leaderboard's metrics. This file records what was done, how, the results, and how to reproduce or extend it.
 
-**Status:** training done, model saved, evaluation done on the 300-turn shared sample. Judge coverage is 277–300 of 300 turns per model; a final pass is filling the last rate-limited rows (n per cell is in every table). A DPO round on top of the tuned model is planned (~300 pairs, ~$37 budget) and will be added here.
+**Status: final.** Training done, model saved, evaluation complete on the 300-turn shared sample: every valid answer of every model judged (base Muse's 16 invalid answers have no move and are not judged, as on the leaderboard). A DPO round on top of the tuned model is planned (~250–300 pairs, ~$37 budget) and will be added here.
 
 ## 1. Results in one table
 
@@ -10,20 +10,20 @@ A second student, trained alongside the Qwen3.5-9B run: **Muse Glimmer 30B + LoR
 
 | Metric | Opus 5 (ref) | DeepSeek V4.1 Flash (teacher) | Qwen3.5-9B base | **Muse base** | **Muse tuned** |
 |---|---|---|---|---|---|
-| Quality | 95% | 96% | 83% | 92% | **94%** |
+| Quality | 95% | 95% | 82% | 92% | **94%** |
 | Valid output | 99% | 100% | 99% | 95% | **100%** |
-| Rules kept | 98% | 100% | 85% | 96% | **98%** |
+| Rules kept | 98% | 99% | 85% | 96% | **98%** |
 | Gives answer away | 1% | 0% | 10% | 0% | **1%** |
-| Resists fishing / injection | 97% (n=68) | 100% (n=55) | 72% (n=61) | 84% (n=58) | **97%** (n=71) |
+| Resists fishing / injection | 97% (n=71) | 97% (n=70) | 73% (n=71) | 85% (n=67) | **97%** (n=71) |
 | Reveals answer when moving on | 0% | 0% | 11% | 3% | **0%** |
 | Same move as Opus | – | 64% | 42% | 45% | **65%** |
 | Same grade as Opus (Assess) | – | 97% (n=38) | 68% (n=37) | 94% (n=31) | **82%** (n=40) |
-| Judge 1–5 | 4.34 | 4.35 | 3.16 | 4.00 | **4.25** |
-| Judge prefers it or ties vs Opus | – | 57% | 7% | 24% | **41%** |
+| Judge 1–5 | 4.32 | 4.36 | 3.16 | 4.00 | **4.25** |
+| Judge prefers it or ties vs Opus | – | 58% | 7% | 24% | **41%** |
 | Latency p50 | 9.2 s | 12.0 s | 5.1 s | 18.0 s | **8.0 s** |
 | Median output tokens | – | 1,354 | 1,434 | 1,720 | **278** |
 
-Judge columns cover 277–300 of the 300 turns per model (Muse tuned: all 300); the last few rate-limited rows are being filled and the report regenerated. Code-scored columns (valid output, same move, same grade, latency, tokens) are on all 300. Full per-mode tables with 95% bootstrap intervals and exact n: [results/muse_eval/REPORT_deepseek_judge.md](results/muse_eval/REPORT_deepseek_judge.md). Raw numbers for charts: [board_deepseek_judge.json](results/muse_eval/board_deepseek_judge.json), loss curve [training_loss.csv](results/muse_eval/training_loss.csv).
+Judge columns cover all 300 turns for every model except base Muse (284: its 16 invalid answers aren't judged) and DeepSeek (299). Code-scored columns (valid output, same move, same grade, latency, tokens) are on all 300. Full per-mode tables with 95% bootstrap intervals and exact n: [results/muse_eval/REPORT_deepseek_judge.md](results/muse_eval/REPORT_deepseek_judge.md). Raw numbers for charts: [board_deepseek_judge.json](results/muse_eval/board_deepseek_judge.json), loss curve [training_loss.csv](results/muse_eval/training_loss.csv).
 
 **Base → tuned, paired on the same turns (exact McNemar):**
 
@@ -31,13 +31,13 @@ Judge columns cover 277–300 of the 300 turns per model (Muse tuned: all 300); 
 |---|---|---|---|---|
 | Valid output | 0 | 16 | 300 | 3e-05 |
 | Same move as Opus | 38 | 99 | 298 | 2e-07 |
-| Judge score ≥ 4 | 13 | 54 | 277 | 5e-07 |
-| Did not give answer away | 4 | 1 | 277 | 0.38 (n.s.) |
+| Judge score ≥ 4 | 13 | 55 | 284 | 3e-07 |
+| Did not give answer away | 4 | 1 | 284 | 0.38 (n.s.) |
 
 ### What it means
-- **Fine-tuning worked.** Same move 45% → 65% (interview 34% → 65%, assess 54% → 78%), valid output 95% → 100%, judge 4.00 → 4.25, win/tie vs Opus 24% → 41%, resists fishing / injection 84% → 97%. The paired tests are significant.
+- **Fine-tuning worked.** Same move 45% → 65% (interview 34% → 65%, assess 54% → 78%), valid output 95% → 100%, judge 4.00 → 4.25, win/tie vs Opus 24% → 41%, resists fishing / injection 85% → 97%. The paired tests are significant.
 - **The student matches its teacher on move choice** (65% vs 64%) and on not leaking (1% vs 0%), at 1/5 of the output length and 2/3 of the latency.
-- **Still behind the teacher on judged quality:** win/tie vs Opus 41% vs 57%, judge 4.25 vs 4.34.
+- **Still behind the teacher on judged quality:** win/tie vs Opus 41% vs 58%, judge 4.25 vs 4.36.
 - **One regression: Assess grading.** Same grade as Opus 94% (base, n=31) → 82% (tuned, n=40); teacher 97%. Small n, and the tuned model closes more stages, but this is the clearest next target (more Assess stage-closing rows, or DPO on grading).
 - Versus the other student, **Qwen3.5-9B base**, tuned Muse is far ahead on every column; compare with Qwen3.5-9B *tuned* once that run is evaluated with the same judge.
 
@@ -100,7 +100,7 @@ Logs and curves: [fireworks-training-runs/codepraxis-muse-v1/](fireworks-trainin
 | In-session eval sampling (pilot 20 + full 40 rows, base and tuned) | ~0.84M prompt + 0.11M sampled tokens at serverless rates (~$2) |
 | Tuned deployment `eqb76xt9` (H200, $8/h) | while up for the 300-turn run; now parked at 0 |
 | Base deployment `muse-glimmer-base-eval` (H200, $8/h) | ~35 min, then deleted |
-| DeepSeek judge (Fireworks serverless) | ~$0.004 per call, ~$10–12 for all rows |
+| DeepSeek judge (Fireworks serverless) | $13.10 for all rows (~$0.004 per call) |
 
 ## 5. How it was evaluated
 
@@ -129,9 +129,9 @@ python scripts/eval_report.py --judge gpt   # same, GPT-5.4 verdicts where they 
 ```
 
 ### 5.3 Can the DeepSeek judge be trusted? It is the teacher.
-Checked on 877 replies that both judges scored (Opus, DeepSeek, Qwen base):
+Checked on 899 replies that both judges scored (Opus, DeepSeek, Qwen base):
 - Overall score within 1 point: **95%** (identical 49%); "gives answer away" verdict identical: **97%**.
-- Same ranking. Means GPT-5.4 vs DeepSeek: Opus 4.56 vs 4.34, DeepSeek 4.62 vs 4.35, Qwen base 3.16 vs 3.16. DeepSeek does **not** score its own replies above Opus's, so no sign of self-preference on these rows. It is slightly stricter at the top.
+- Same ranking. Means GPT-5.4 vs DeepSeek: Opus 4.54 vs 4.32, DeepSeek 4.62 vs 4.36, Qwen base 3.16 vs 3.16. DeepSeek does **not** score its own replies above Opus's, so no sign of self-preference on these rows. It is slightly stricter at the top.
 - Still, its scores are not on the same scale as the GPT-5.4 numbers on the live leaderboard. Compare models only within one judge.
 
 ### 5.4 Metrics
@@ -150,7 +150,6 @@ python scripts/eval_report.py
 To put Muse on the public page, add `"muse-glimmer-tuned"` (and `"muse-glimmer-base"`) to `SHOW` in `distill/site.py`. Note the page reads the GPT-5.4 kinds; with DeepSeek as the final judge, `site.py` needs to read `*_ds` for every model (or rename the kinds) so the page doesn't mix judges.
 
 ## 7. Open items
-- **Finish the judge**: the last rate-limited rows (≤ 23 per model) are being filled. Rerun `scripts/judge_ds.py` (it resumes), then `scripts/export_results.py export results/muse_eval` and `scripts/eval_report.py > results/muse_eval/REPORT_deepseek_judge.md`.
 - **Qwen3.5-9B tuned** (the other student, in progress on the other account): evaluate with the same `judge_ds.py` so both students share a judge.
 - **Next training round for Muse**: the loss plateau after step 250 points to LR decay or a second epoch (free, ~1.5 h, warm-start from the saved adapter with the cookbook's `sft_loop` `warm_start_from_adapter`). Target the Assess grading regression with more stage-closing rows.
 - **DPO is not free** for Muse (~$5.86/1M train + $1.96/1M reference prefill at serverless rates; ~$40 for 300 pairs of this length). Worth it only for a specific behaviour the judge flags.

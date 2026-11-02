@@ -37,3 +37,4 @@ Approved by user, 2026-11-02: "i have 50$ credit, lets do it"
   Saved model: accounts/vishakha-d933-0nmp64/models/muse-starter-sl-codepraxis-muse-v1 (HF_PEFT_ADDON, READY, r=16, targets q/k/v/o/gate/up/down).
   Training session ts-04c8fa92... deleted after promotion to free the account's single Muse Glimmer slot. Nothing billable running; no deployment.
 - Eval: tuned + base Muse answered the 300-turn shared sample (scripts/run_tuned.py). Base deployment muse-glimmer-base-eval deleted after the run; tuned eqb76xt9 parked at 0 replicas. Judge: DeepSeek V4.1 Flash (scripts/judge_ds.py, kinds *_ds).
+- Eval final: judge coverage complete (base Muse 284 = its valid answers). DeepSeek judge total $13.10. Report: results/muse_eval/REPORT_deepseek_judge.md
