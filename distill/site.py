@@ -239,6 +239,7 @@ ul.notes li { margin: 4px 0; }
   <p class="lede">Every turn of a CodePraxis AI interview, and of its Learn tutor (Study) and Learn assessment (Assess), is one model call. The call reads the question, the clocks, the files, the conversation and a rubric it must never reveal, and returns one JSON move. We froze a test set of turns where <b>Claude Opus 5</b> was the interviewer, then had every other model answer the exact same prompts.</p>
   <div class="tiles" id="tiles"></div>
   <p class="muted" id="meta"></p>
+  <p><a href="presentation.html">How the three agents work, the baseline and the evaluation &rarr;</a></p>
 
   <div class="tabs" role="tablist" id="tabs"></div>
   <h2>Quality against cost and speed</h2>

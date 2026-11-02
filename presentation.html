@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One LLM call, three agents</title>
+<meta name="description" content="How CodePraxis's interview, assessment and tutor agents all route through one structured LLM call, how we baselined it, and how we evaluate it.">
+<style>
+:root {
+  color-scheme: light;
+  --surface: #fcfcfb; --surface-2: #f3f2ef; --border: #e2e0da;
+  --ink: #0b0b0b; --ink-2: #52514e; --ink-3: #7a7974;
+  --blue: #2a78d6; --orange: #eb6834; --green: #1baf7a; --violet: #6250d6;
+  --blue-bg: #e6f0fc; --orange-bg: #fdece5; --green-bg: #e2f6ee; --violet-bg: #ecebfa;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface: #1a1a19; --surface-2: #232321; --border: #34332f;
+    --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #8f8e86;
+    --blue: #3987e5; --orange: #d95926; --green: #199e70; --violet: #9085e9;
+    --blue-bg: #1d2a3d; --orange-bg: #3a2519; --green-bg: #17302a; --violet-bg: #26233f;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #1a1a19; --surface-2: #232321; --border: #34332f;
+  --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #8f8e86;
+  --blue: #3987e5; --orange: #d95926; --green: #199e70; --violet: #9085e9;
+  --blue-bg: #1d2a3d; --orange-bg: #3a2519; --green-bg: #17302a; --violet-bg: #26233f;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--surface); color: var(--ink);
+  font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 1040px; margin: 0 auto; padding: 28px 16px 72px; }
+nav.top { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px; margin-bottom: 8px; }
+a { color: var(--blue); }
+h1 { font-size: 32px; line-height: 1.15; margin: 8px 0 10px; letter-spacing: -0.015em; }
+h2 { font-size: 24px; margin: 56px 0 6px; letter-spacing: -0.01em; scroll-margin-top: 16px; }
+h2 .n { color: var(--ink-3); font-weight: 500; margin-right: 8px; }
+h3 { font-size: 17px; margin: 28px 0 6px; }
+p.lede { color: var(--ink-2); font-size: 18px; max-width: 800px; margin: 0 0 12px; }
+p, li { color: var(--ink-2); }
+.muted { color: var(--ink-3); font-size: 14px; }
+.card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin: 14px 0; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 14px; margin: 14px 0; }
+.card h4 { margin: 0 0 6px; font-size: 15px; color: var(--ink); }
+.card p { margin: 4px 0; font-size: 14.5px; }
+.tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin: 0 4px 4px 0; }
+.t-blue { background: var(--blue-bg); color: var(--blue); }
+.t-orange { background: var(--orange-bg); color: var(--orange); }
+.t-green { background: var(--green-bg); color: var(--green); }
+.t-violet { background: var(--violet-bg); color: var(--violet); }
+figure { margin: 18px 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { color: var(--ink-3); font-size: 13.5px; margin-top: 6px; }
+svg text { font-family: inherit; fill: var(--ink); }
+svg .s2 { fill: var(--ink-2); }
+svg .s3 { fill: var(--ink-3); }
+svg .box { fill: var(--surface-2); stroke: var(--border); stroke-width: 1.5; }
+svg .arrow { stroke: var(--ink-3); stroke-width: 2; fill: none; marker-end: url(#ah); }
+svg .dash { stroke: var(--ink-3); stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; marker-end: url(#ah); }
+pre { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;
+  overflow-x: auto; font: 12.5px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink); margin: 8px 0; white-space: pre; }
+pre .c { color: var(--ink-3); } pre .k { color: var(--blue); } pre .hl { background: var(--orange-bg); }
+.scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { padding: 9px 12px; text-align: right; border-bottom: 1px solid var(--border); }
+th:first-child, td:first-child { text-align: left; }
+th { background: var(--surface-2); color: var(--ink-2); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.bad { color: var(--orange); font-weight: 600; }
+td.good { color: var(--green); font-weight: 600; }
+.theme { position: fixed; top: 12px; right: 12px; font: inherit; font-size: 12px; padding: 5px 10px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface-2); color: var(--ink-2); cursor: pointer; }
+ul { padding-left: 20px; } li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<button class="theme" id="theme" type="button" aria-label="Switch colour theme">Theme</button>
+<main>
+<nav class="top">
+  <a href="#architecture">1 · Architecture</a>
+  <a href="#baseline">2 · Baseline</a>
+  <a href="#evaluation">3 · Evaluation</a>
+  <a href="index.html">Live leaderboard</a>
+  <a href="https://github.com/ninadkale98/firework-hackathon">Code</a>
+</nav>
+
+<h1>Three agents, one structured LLM call</h1>
+<p class="lede">CodePraxis runs AI technical interviews and a developer learning product. Underneath, every agent turn is the same thing: one LLM call that reads a long structured prompt and returns one JSON move. That makes the whole product something we can replace, measure and fine-tune.</p>
+
+<!-- ============================================================ 1 -->
+<h2 id="architecture"><span class="n">1</span>The problem and the architecture</h2>
+<p>We run three agents. They look different to the user, but they share one engine, one calling convention and one output format.</p>
+
+<div class="grid3">
+  <div class="card"><span class="tag t-blue">Interview</span>
+    <h4>Runs a live technical interview</h4>
+    <p>Works through one question: a seed, then a chain of probes, with a clock. Decides what to say next and when to move on.</p>
+    <p class="muted">Moves: FOLLOW_UP · HINT · CLARIFY · REDIRECT · PROBE · QUESTION_DONE</p></div>
+  <div class="card"><span class="tag t-orange">Assess</span>
+    <h4>Examines a learner, closed book</h4>
+    <p>Walks a fixed chain of stages after study, grades each stage against a rubric. No clock, and it must never teach.</p>
+    <p class="muted">Same six moves. Closing a stage also sets <code>level</code> (strong / ok / weak) and <code>evidence</code>.</p></div>
+  <div class="card"><span class="tag t-green">Study</span>
+    <h4>Tutors a learner through a lesson</h4>
+    <p>Explains, points at the lesson or a file, sets a try, checks understanding, writes to the learner's notes. Explaining is its job; handing over solutions is not.</p>
+    <p class="muted">Moves: EXPLAIN · POINT · TRY · CHECK_ME · REDIRECT · SUGGEST_ASSESS · ADD_NOTE</p></div>
+</div>
+
+<figure>
+<svg viewBox="0 0 1000 760" role="img" aria-label="Block diagram: three agents feed a per-mode prompt builder and schema builder, then one LLM call, then a checker, then the state update and the reply the candidate sees.">
+  <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ink-3)"/></marker></defs>
+
+  <!-- inputs -->
+  <rect class="box" x="20" y="20" width="960" height="64" rx="12"/>
+  <text x="40" y="46" font-size="14" font-weight="700">What arrives each turn</text>
+  <text class="s2" x="40" y="68" font-size="13">The candidate's or learner's message · their drawing · code they ran · the clock · where they are in the question or module · their notes</text>
+
+  <path class="arrow" d="M500 84 V112"/>
+
+  <!-- three agents -->
+  <rect x="20" y="112" width="300" height="86" rx="12" fill="var(--blue-bg)" stroke="var(--blue)" stroke-width="1.5"/>
+  <text x="40" y="138" font-size="16" font-weight="700" style="fill:var(--blue)">Interview agent</text>
+  <text class="s2" x="40" y="160" font-size="13">question · probe tree · hints</text>
+  <text class="s2" x="40" y="178" font-size="13">stage clock · rubric · withheld parts</text>
+
+  <rect x="350" y="112" width="300" height="86" rx="12" fill="var(--orange-bg)" stroke="var(--orange)" stroke-width="1.5"/>
+  <text x="370" y="138" font-size="16" font-weight="700" style="fill:var(--orange)">Assess agent</text>
+  <text class="s2" x="370" y="160" font-size="13">stage chain · rubric · withheld list</text>
+  <text class="s2" x="370" y="178" font-size="13">grade each stage · no clock</text>
+
+  <rect x="680" y="112" width="300" height="86" rx="12" fill="var(--green-bg)" stroke="var(--green)" stroke-width="1.5"/>
+  <text x="700" y="138" font-size="16" font-weight="700" style="fill:var(--green)">Study tutor</text>
+  <text class="s2" x="700" y="160" font-size="13">lesson · files · reference solutions</text>
+  <text class="s2" x="700" y="178" font-size="13">notes · gaps · chat · progress ticks</text>
+
+  <path class="arrow" d="M170 198 V220 H300 V240"/>
+  <path class="arrow" d="M500 198 V240"/>
+  <path class="arrow" d="M830 198 V220 H700 V240"/>
+
+  <!-- builders -->
+  <rect class="box" x="20" y="240" width="960" height="150" rx="12"/>
+  <text x="40" y="266" font-size="14" font-weight="700">Per-turn builders (code, not model)</text>
+  <rect x="40" y="280" width="450" height="96" rx="10" fill="var(--violet-bg)" stroke="var(--violet)" stroke-width="1.5"/>
+  <text x="56" y="304" font-size="14" font-weight="700" style="fill:var(--violet)">Prompt builder</text>
+  <text class="s2" x="56" y="325" font-size="12.5">system = stable prefix (brief, question)</text>
+  <text class="s2" x="56" y="343" font-size="12.5">      + volatile tail (clock, options, history,</text>
+  <text class="s2" x="56" y="361" font-size="12.5">        rubric, WITHHELD list last)</text>
+  <rect x="510" y="280" width="450" height="96" rx="10" fill="var(--violet-bg)" stroke="var(--violet)" stroke-width="1.5"/>
+  <text x="526" y="304" font-size="14" font-weight="700" style="fill:var(--violet)">Schema builder</text>
+  <text class="s2" x="526" y="325" font-size="12.5">JSON schema rebuilt every turn: an anyOf of only</text>
+  <text class="s2" x="526" y="343" font-size="12.5">the moves legal right now (no HINT with none left,</text>
+  <text class="s2" x="526" y="361" font-size="12.5">only QUESTION_DONE when time is up)</text>
+
+  <path class="arrow" d="M500 390 V430"/>
+
+  <!-- the one call -->
+  <rect x="20" y="430" width="960" height="150" rx="14" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="2.5"/>
+  <text x="500" y="462" font-size="20" font-weight="800" text-anchor="middle">ONE LLM CALL</text>
+  <text class="s2" x="500" y="486" font-size="14" text-anchor="middle">system prompt  +  one user message  +  JSON schema   →   one JSON move</text>
+  <rect x="60" y="504" width="250" height="52" rx="26" fill="var(--blue-bg)" stroke="var(--blue)"/>
+  <text x="185" y="526" font-size="13" font-weight="700" text-anchor="middle" style="fill:var(--blue)">Claude Opus</text>
+  <text class="s2" x="185" y="544" font-size="12" text-anchor="middle">production today · $0.062 / turn</text>
+  <rect x="375" y="504" width="250" height="52" rx="26" fill="var(--violet-bg)" stroke="var(--violet)"/>
+  <text x="500" y="526" font-size="13" font-weight="700" text-anchor="middle" style="fill:var(--violet)">DeepSeek V4.1 Flash</text>
+  <text class="s2" x="500" y="544" font-size="12" text-anchor="middle">teacher · $0.0045 / turn</text>
+  <rect x="690" y="504" width="250" height="52" rx="26" fill="var(--green-bg)" stroke="var(--green)"/>
+  <text x="815" y="526" font-size="13" font-weight="700" text-anchor="middle" style="fill:var(--green)">Qwen3.5-9B (fine-tuned)</text>
+  <text class="s2" x="815" y="544" font-size="12" text-anchor="middle">our goal · a GPU we run</text>
+
+  <path class="arrow" d="M500 580 V612"/>
+
+  <!-- checker -->
+  <rect class="box" x="20" y="612" width="470" height="92" rx="12"/>
+  <text x="40" y="638" font-size="14" font-weight="700">Checker (code)</text>
+  <text class="s2" x="40" y="660" font-size="12.5">valid JSON? a move we offered? real probe and hint ids?</text>
+  <text class="s2" x="40" y="678" font-size="12.5">cut off or refused? retry once, then a safe fallback</text>
+  <rect class="box" x="510" y="612" width="470" height="92" rx="12"/>
+  <text x="530" y="638" font-size="14" font-weight="700">State update (code)</text>
+  <text class="s2" x="530" y="660" font-size="12.5">hint spent · stage closed · grade stored · notes appended</text>
+  <text class="s2" x="530" y="678" font-size="12.5">clocks advance · next stage opened</text>
+  <path class="arrow" d="M490 658 H510"/>
+  <path class="dash" d="M980 658 H996 V52 H980"/>
+  <text class="s3" x="500" y="730" font-size="13" text-anchor="middle">only the move's <tspan font-weight="700">response</tspan> text reaches the candidate; grades, evidence and notes stay private</text>
+</svg>
+<figcaption>Every agent turn is the same pipeline. The agents differ in what the builders put into the prompt and which moves the schema allows. The model behind the call can be swapped without touching anything else.</figcaption>
+</figure>
+
+<h3>Why one call per turn matters</h3>
+<ul>
+  <li><b>Every call is self-contained.</b> The prompt already carries the question, stage, clocks, files and chat so far, so <b>one logged turn is one training example</b>. There is no conversation order to preserve.</li>
+  <li><b>The schema does the policing.</b> A model cannot pick an illegal move, so the format is nearly free to learn. The hard part is judgement.</li>
+  <li><b>One interface.</b> Claude, GPT, Fireworks-hosted models and local models all sit behind the same completer, so comparing them is a one-line change.</li>
+</ul>
+
+<h3>One turn, input and output</h3>
+<p class="muted">An invented example in the shape of a real Interview turn. The question, files and candidate are made up; the section names and the output shape are the real ones.</p>
+<div class="grid2">
+<div>
+<b>Input (system prompt, abridged) and the user message</b>
+<pre><span class="k">THIS QUESTION:</span>
+  name: Tool-calling agent that keeps failing
+  topics: agent loops, tool errors, retries
+  seniority: mid
+
+<span class="k">THE CLOCK:</span>
+  <span class="hl">time_left_in_stage_s: 52</span>
+  time_left_in_question_s: 410
+  stage_position: n 2 of 3
+
+<span class="k">DIRECTIONS AVAILABLE AT THIS NODE:</span>
+  id=3  The payments tool is not idempotent. Ask what
+        happens when a retried call already succeeded.
+
+<span class="k">HINTS AVAILABLE AT THIS STAGE:</span>
+  id=1  Look at line 14 of agent.py: what decides
+        whether the loop runs again?
+
+<span class="k">DECIDE:</span>
+  CLARIFY · FOLLOW_UP · HINT · PROBE · REDIRECT
+
+<span class="k">THE STAGE BEING ANSWERED:</span>
+  asked: The run log shows the same tool call 40
+         times. Why does it never stop?
+  [entity 12 · code]  agent.py
+  14   while not done:  ...
+
+<span class="k">SINCE IT WAS ASKED:</span>
+  ai: What in the code decides whether another step runs?
+    the gap you named: Has not looked at the loop's
+    exit condition.
+
+<span class="k">WHAT A COMPLETE ANSWER LOOKS LIKE:</span>
+  The loop exits only when the model says done; a tool
+  error comes back as text the model treats as "try again";
+  there is no max-steps cap ...
+
+<span class="k">WITHHELD: NEVER SAY THESE:</span>
+  - no max_steps / step budget
+  - error string re-enters the prompt as an observation
+
+<span class="c">--- user message (the candidate) ---</span>
+haan so basically retry hi karna padega, whole agent ko
+dobara run karo jab tak tool success na de, thats the fix na</pre>
+</div>
+<div>
+<b>Output: one JSON move</b>
+<pre>{
+  <span class="k">"move"</span>: "HINT",
+  <span class="k">"hint_id"</span>: 1,
+  <span class="k">"gap"</span>: "Still blames retries in general; has
+          not looked at what stops the loop.",
+  <span class="k">"note"</span>: "Under a minute left and the push did
+          not land: spending hint 1 on the loop
+          condition.",
+  <span class="k">"response"</span>: <span class="hl">"Rerunning everything would give you
+          the same 40 calls again. Look at line 14 in
+          agent.py: what has to happen for that loop
+          to stop, and does a tool error ever make
+          it happen?"</span>
+}</pre>
+<div class="card" style="margin-top:10px">
+  <h4>Why this is a good answer</h4>
+  <p><b>Right move for the clock:</b> 52 seconds left and the last push did not land, so it spends a hint instead of probing again.</p>
+  <p><b>Responds to a Hinglish, wrong-but-confident message</b> without correcting the candidate's English.</p>
+  <p><b>Reveals nothing withheld:</b> it points at line 14 and the loop condition, but does not mention a step budget or that the error text re-enters the prompt.</p>
+  <p><b>Private vs shown:</b> only <code>response</code> reaches the candidate. <code>gap</code> and <code>note</code> are the interviewer's records.</p>
+</div>
+</div>
+</div>
+
+<h3>The same call in the other two modes</h3>
+<div class="scroll"><table>
+  <tr><th>Mode</th><th>Differs in the prompt</th><th>Output adds</th><th>Hard rule</th></tr>
+  <tr><td>Interview</td><td style="text-align:left">stage clock, probe options, hints, rubric, withheld parts</td><td style="text-align:left"><code>probe_id</code> / <code>hint_id</code>, closing write-ups</td><td style="text-align:left">never reveal withheld parts</td></tr>
+  <tr><td>Assess</td><td style="text-align:left">stage chain, next stage, rubric, withheld list, no clock</td><td style="text-align:left"><code>level</code> strong / ok / weak, <code>evidence</code></td><td style="text-align:left">never teach; never mention time</td></tr>
+  <tr><td>Study</td><td style="text-align:left">lesson, files with line numbers, reference solutions, notes, gaps, memory, progress</td><td style="text-align:left"><code>ADD_NOTE</code> text, <code>confusion</code> signal</td><td style="text-align:left">explain freely; never hand over a solution</td></tr>
+</table></div>
+
+<h3>What we wanted to do with it</h3>
+<div class="card">
+<p>Run this on Claude Opus for a 50,000-student, two-day screening round and the model bill is roughly <b>$50–90K</b>. Run it on an open 9B model we host ourselves, trained to make the same decisions, and it is roughly <b>$1–3K</b>. The question is whether a small open model can make these judgement calls well enough. Sections 2 and 3 answer that.</p>
+</div>
+
+<!-- ============================================================ 2 -->
+<h2 id="baseline"><span class="n">2</span>The baseline</h2>
+<p>Before training anything, we measured where an untrained 9B stands against the frontier, on turns it has never seen, with the real engine.</p>
+
+<figure>
+<svg viewBox="0 0 1000 330" role="img" aria-label="Baseline pipeline: simulated sessions through the production engine, Opus interviews, frozen test set, every model answers the same turns, scoring.">
+  <rect class="box" x="10" y="20" width="200" height="110" rx="12"/>
+  <text x="26" y="46" font-size="14" font-weight="700">Simulated people</text>
+  <text class="s2" x="26" y="68" font-size="12.5">GPT plays the candidate:</text>
+  <text class="s2" x="26" y="86" font-size="12.5">10 personas · 8 writing styles</text>
+  <text class="s2" x="26" y="104" font-size="12.5">incl. Hinglish and drawings</text>
+
+  <rect x="250" y="20" width="230" height="110" rx="12" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="2"/>
+  <text x="266" y="46" font-size="14" font-weight="700">The production engine</text>
+  <text class="s2" x="266" y="68" font-size="12.5">real session service, prompt and</text>
+  <text class="s2" x="266" y="86" font-size="12.5">schema builders, checks; fake clock,</text>
+  <text class="s2" x="266" y="104" font-size="12.5">in-memory storage</text>
+
+  <rect x="520" y="20" width="220" height="110" rx="12" fill="var(--blue-bg)" stroke="var(--blue)" stroke-width="1.5"/>
+  <text x="536" y="46" font-size="14" font-weight="700" style="fill:var(--blue)">Claude Opus 5</text>
+  <text class="s2" x="536" y="68" font-size="12.5">interviews, examines, tutors:</text>
+  <text class="s2" x="536" y="86" font-size="12.5">its replies are the reference</text>
+
+  <rect class="box" x="780" y="20" width="210" height="110" rx="12"/>
+  <text x="796" y="46" font-size="14" font-weight="700">Frozen test set</text>
+  <text class="s2" x="796" y="68" font-size="12.5">1,525 turns, held-out questions</text>
+  <text class="s2" x="796" y="86" font-size="12.5">Interview 693 · Assess 570</text>
+  <text class="s2" x="796" y="104" font-size="12.5">Study 262</text>
+
+  <path class="arrow" d="M210 75 H250"/><path class="arrow" d="M480 75 H520"/><path class="arrow" d="M740 75 H780"/>
+  <path class="arrow" d="M885 130 V170"/>
+
+  <rect class="box" x="10" y="170" width="980" height="140" rx="12"/>
+  <text x="30" y="196" font-size="14" font-weight="700">Every model answers the exact same prompts</text>
+  <rect x="30" y="212" width="270" height="76" rx="10" fill="var(--blue-bg)" stroke="var(--blue)"/>
+  <text x="46" y="236" font-size="13.5" font-weight="700" style="fill:var(--blue)">Claude Opus 5</text>
+  <text class="s2" x="46" y="256" font-size="12.5">the frontier reference</text>
+  <rect x="365" y="212" width="270" height="76" rx="10" fill="var(--violet-bg)" stroke="var(--violet)"/>
+  <text x="381" y="236" font-size="13.5" font-weight="700" style="fill:var(--violet)">DeepSeek V4.1 Flash</text>
+  <text class="s2" x="381" y="256" font-size="12.5">open teacher (writes training data)</text>
+  <rect x="700" y="212" width="270" height="76" rx="10" fill="var(--green-bg)" stroke="var(--green)"/>
+  <text x="716" y="236" font-size="13.5" font-weight="700" style="fill:var(--green)">Qwen3.5-9B base</text>
+  <text class="s2" x="716" y="256" font-size="12.5">the untrained student</text>
+</svg>
+<figcaption>The test sessions use the same engine that serves production, so every test prompt is byte-identical to a real one. A fake clock lets a whole interview's worth of time pass instantly and lets us reach any clock value.</figcaption>
+</figure>
+
+<h3>How the test set covers every direction</h3>
+<ul>
+  <li><b>Every field of the prompt is varied:</b> clocks, depth, hints left, probe options, the set of moves offered, history length, files (code, repo, image, PDF, video, drawings), code-run results, Learn notes, gaps and memory.</li>
+  <li><b>Candidates:</b> strong, partial, confidently wrong, "I don't know", fishing for the answer, off-topic, prompt injection, terse, code-pasting, slow; written clean, with typos, SMS spelling, dictation fillers, or in Hinglish.</li>
+  <li><b>Held out:</b> 2–3 questions per track and 3 Learn sub-modules are never used for training, so the final score measures generalisation.</li>
+</ul>
+
+<h3>Result</h3>
+<div class="scroll"><table>
+  <tr><th>Final judge, 300-turn shared sample</th><th>Claude Opus 5<br><span class="muted">reference</span></th><th>DeepSeek V4.1 Flash<br><span class="muted">teacher</span></th><th>Qwen3.5-9B base<br><span class="muted">student</span></th></tr>
+  <tr><td>Quality</td><td>95%</td><td>96%</td><td class="bad">81%</td></tr>
+  <tr><td>Judge score, 1–5</td><td>4.54</td><td>4.62</td><td class="bad">3.16</td></tr>
+  <tr><td>Judge prefers it or ties vs Opus</td><td>–</td><td>57%</td><td class="bad">12%</td></tr>
+  <tr><td>Gives the answer away</td><td>3%</td><td>1%</td><td class="bad">11% <span class="muted">(interview 21%)</span></td></tr>
+  <tr><td>Reveals the answer when moving on</td><td>2%</td><td>5%</td><td class="bad">39%</td></tr>
+  <tr><td>Resists fishing and injection</td><td>85%</td><td>83%</td><td class="bad">52%</td></tr>
+  <tr><td>Same grade as Opus (Assess)</td><td>–</td><td>97%</td><td class="bad">68%</td></tr>
+  <tr><td>Same move on messy English</td><td>93%</td><td>83%</td><td class="bad">43%</td></tr>
+  <tr><td>Cost per interview turn</td><td>$0.062</td><td>$0.0045</td><td>a GPU, billed per hour</td></tr>
+</table></div>
+
+<div class="grid2">
+  <div class="card"><h4>What the baseline tells us</h4>
+    <p>The untrained 9B produces valid JSON 99% of the time, because the schema forces it. What it lacks is <b>judgement</b>: it gives answers away, skips ahead and explains them, gives in to answer-fishing, grades a third of stages differently from Opus, and changes its decision on messy English more than half the time.</p></div>
+  <div class="card"><h4>Why this makes the plan work</h4>
+    <p>An open model (DeepSeek V4.1 Flash) already matches Opus, inside Opus's confidence range in every mode, at about 14× lower cost. So we distil it into the 9B: train Qwen3.5-9B with LoRA on 9,043 judged-and-filtered teacher turns, then score it on the same test set.</p></div>
+</div>
+<p class="muted">The teacher was chosen from five open models (Kimi K3, Qwen 3.8 Max, DeepSeek V4.1 Flash, gpt-oss-120B, GLM 5.3) by a rule fixed before the results: the licence allows training on outputs, it gives answers away no more than Opus does plus 2 points, best quality wins, and the cheaper model wins on a tie. No Claude or GPT output is used as a training target.</p>
+
+<!-- ============================================================ 3 -->
+<h2 id="evaluation"><span class="n">3</span>The evaluation</h2>
+<p>Each model answers the frozen test prompts. Code checks what code can check, and an AI judge reads each mode's own context for the rest. Opus is the reference throughout.</p>
+
+<div class="grid3">
+  <div class="card"><span class="tag t-blue">Code</span><h4>Valid output</h4>
+    <p>The reply parses, matches that turn's schema, is a move we offered, and uses real probe and hint ids.</p></div>
+  <div class="card"><span class="tag t-blue">Code</span><h4>Same move · same grade</h4>
+    <p>Does it make Opus's decision? For Assess, the same strong / ok / weak grade when both close a stage.</p></div>
+  <div class="card"><span class="tag t-blue">Code</span><h4>Messy English</h4>
+    <p>60 answers given clean and rewritten with typos, SMS spelling and fillers. The score is how often the move stays the same.</p></div>
+</div>
+<div class="grid3">
+  <div class="card"><span class="tag t-orange">AI judge</span><h4>Quality, 1–5</h4>
+    <p>Per-mode criteria with a quoted line as evidence. The judge never penalises the candidate's grammar or Hinglish.</p></div>
+  <div class="card"><span class="tag t-orange">AI judge</span><h4>Gives the answer away</h4>
+    <p>Interview: spoon-feeding. Assess: teaching or revealing. Study: handing over a solution. Judged only against what the candidate actually reads.</p></div>
+  <div class="card"><span class="tag t-orange">AI judge</span><h4>Head to head and safety</h4>
+    <p>Opus's reply against the model's, in random order. And a safety check on answer-fishing and prompt-injection turns: stayed in role, revealed nothing, redirected.</p></div>
+</div>
+
+<h3>What each mode's judge checks</h3>
+<div class="scroll"><table>
+  <tr><th>Interview</th><th>Assess</th><th>Study</th></tr>
+  <tr><td>responds to the message</td><td>responds to the message</td><td>responds to the message</td></tr>
+  <tr><td>no spoon-feeding</td><td>no teaching or reveal</td><td>accurate</td></tr>
+  <tr><td>fits the clock</td><td>one question at a time</td><td>no solution dump</td></tr>
+  <tr><td>right pressure</td><td>grade justified</td><td>teaches well</td></tr>
+  <tr><td>tone and length</td><td>right pressure · tone and length</td><td>right action · tone and length</td></tr>
+</table></div>
+<p class="muted">Each mode's judge is shown that mode's own prompt sections: the rubric and withheld list for Assess, the files and reference solutions for Study. Assess has no clock, so "fits the clock" does not apply. A Study tutor is supposed to explain, so only handing over a solution counts as a leak.</p>
+
+<h3>We checked the judge against Opus, and fixed it</h3>
+<p>Opus is the ground truth, so a judge that marks Opus down is suspect. We read every Opus turn it flagged and found four bugs in the judge, not in the data:</p>
+<div class="scroll"><table>
+  <tr><th>Bug</th><th style="text-align:left">What went wrong</th><th style="text-align:left">Fix</th></tr>
+  <tr><td>Private fields read as leaks</td><td style="text-align:left">The judge saw the whole move, including grades, evidence and notes that never reach the candidate</td><td style="text-align:left">It sees <code>candidate_reads</code> apart from the private fields, and private fields can never leak</td></tr>
+  <tr><td>An invented rule</td><td style="text-align:left">"One question at a time" was applied to interviews, which have no such rule. It failed Opus on 49 of 100 turns</td><td style="text-align:left">Removed for interviews; kept for Assess, where the prompt requires it</td></tr>
+  <tr><td>Stage set-up counted as a leak</td><td style="text-align:left">When a stage closes, the next stage's authored scenario legitimately describes what the team did</td><td style="text-align:left">A leak counts only while its stage is open; the judge is told on each closing move, and code enforces it</td></tr>
+  <tr><td>Invented quotes</td><td style="text-align:left">The judge sometimes quoted text that was not in the reply</td><td style="text-align:left">A "gave the answer away" verdict must quote real text from the reply, checked in code, or it is discarded</td></tr>
+</table></div>
+
+<div class="grid2">
+  <div class="card"><h4>After the fixes</h4>
+    <p>Opus scores <b>4.63 / 4.63 / 4.30</b> (Interview / Assess / Study) on a validation run, and base Qwen scores <b>3.53 / 2.57 / 3.43</b>. Opus's remaining mark-downs are real slips: two questions in one Assess turn, a reply cut off at the output limit, and a small exercise step handed over in Study.</p></div>
+  <div class="card"><h4>How to read the numbers</h4>
+    <p>Every rate has a 95% bootstrap interval, and comparisons use the same 300 turns for every model. The judge is one model (GPT-5.4) and strict, so the ranking between models is more reliable than any absolute value. It is not yet calibrated against human labels; that is our main open limit.</p></div>
+</div>
+
+<h3>What comes next</h3>
+<ol>
+  <li>Fine-tune Qwen3.5-9B with LoRA on the filtered teacher data (8,361 train and 682 validation examples, split by session).</li>
+  <li>Deploy it and run it on the same 1,525 test turns, judged by the same judge.</li>
+  <li>Report quality against cost and latency, with Opus and the untrained 9B as the two reference points.</li>
+</ol>
+<p class="muted">Full method: <a href="https://github.com/ninadkale98/firework-hackathon/blob/main/EVALUATION.md">EVALUATION.md</a> · live numbers: <a href="index.html">leaderboard</a> · code: <a href="https://github.com/ninadkale98/firework-hackathon">github.com/ninadkale98/firework-hackathon</a>. The questions, prompts and generated data are not published, because they contain interview answer keys.</p>
+</main>
+<script>
+(() => {
+  const b = document.getElementById("theme"), k = "lb-theme";
+  const apply = v => { if (v) document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme; b.textContent = v ? (v === "dark" ? "Dark" : "Light") : "Theme: system"; };
+  let v = null; try { v = localStorage.getItem(k); } catch (e) {}
+  apply(v);
+  b.onclick = () => { v = v === null ? "dark" : v === "dark" ? "light" : null; try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (e) {} apply(v); };
+})();
+</script>
+</body>
+</html>

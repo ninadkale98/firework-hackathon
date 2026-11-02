@@ -14,6 +14,8 @@ The model picks one move — follow up, hint, clarify, redirect, probe deeper, o
 
 **The goal:** fine-tune **Qwen3.5-9B** on Fireworks to make the same decisions as Claude Opus. The dimension we push is **cost and latency at equal quality**: a 2-day screening round for 50K students costs ~$50K on Opus and ~$2K on a tuned 9B.
 
+**Presentation:** [architecture, baseline and evaluation](https://ninadkale98.github.io/firework-hackathon/presentation.html) · [live leaderboard](https://ninadkale98.github.io/firework-hackathon/)
+
 ## How it works
 
 ```
