@@ -261,14 +261,35 @@ def client():
     return _client
 
 
+_fw_client = None
+
+
+def _endpoint(model: str):
+    """(client, model id) for a judge model: a registry name served on Fireworks
+    (e.g. ``deepseek-v4.1-flash``) goes to Fireworks, anything else to OpenAI."""
+    global _fw_client
+    from distill.models import FIREWORKS_URL, MODELS
+
+    spec = MODELS.get(model)
+    if spec is not None and spec.provider == "fireworks":
+        if _fw_client is None:
+            from openai import AsyncOpenAI
+
+            _fw_client = AsyncOpenAI(api_key=os.environ["FIREWORKS_API_KEY"], base_url=FIREWORKS_URL,
+                                     timeout=300.0, max_retries=6)
+        return _fw_client, spec.model
+    return client(), (spec.model if spec is not None else model)
+
+
 async def _call(system: str, user: str, name: str, schema: Dict[str, Any], *,
                 model: str, reasoning_effort: Optional[str], api=None) -> Dict[str, Any]:
     options: Dict[str, Any] = {}
     if reasoning_effort:
         options["reasoning_effort"] = reasoning_effort
     started = time.monotonic()
-    completion = await (api or client()).chat.completions.create(
-        model=model,
+    endpoint, api_model = _endpoint(model)
+    completion = await (api or endpoint).chat.completions.create(
+        model=api_model,
         messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
         response_format={"type": "json_schema",
                          "json_schema": {"name": name, "strict": True, "schema": schema}},
