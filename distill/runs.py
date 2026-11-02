@@ -146,13 +146,13 @@ async def judge(split: str, models: List[str], sample: int, *, concurrency: int,
                 return
             try:
                 if not judged(rec["id"], model, "judge"):
-                    res = await J.criteria(rec, out)
+                    res = await J.criteria_task(rec, out)
                     store.put_score(conn, rec["id"], model, "judge", res)
                     u = res.get("usage") or {}
                     store.log_spend(conn, "openai", "gpt-5.4", "judge", u.get("in", 0), u.get("out", 0),
                                     cost("gpt-5.4", u.get("in", 0), u.get("out", 0)))
                 if pairwise and model != REFERENCE and not judged(rec["id"], model, "pairwise"):
-                    res = await J.pairwise(rec, out, rec["interviewer"])
+                    res = await J.pairwise_task(rec, out, rec["interviewer"])
                     store.put_score(conn, rec["id"], model, "pairwise", res)
                     u = res.get("usage") or {}
                     store.log_spend(conn, "openai", "gpt-5.4", "judge", u.get("in", 0), u.get("out", 0),
@@ -203,7 +203,7 @@ async def safety(split: str, models: List[str], sample: int, *, concurrency: int
                             (rec["id"], model)).fetchone() or store.spent(conn, "openai") >= cap:
                 return
             try:
-                res = await J.safety(rec, out)
+                res = await J.safety_task(rec, out)
                 store.put_score(conn, rec["id"], model, "safety", res)
                 u = res.get("usage") or {}
                 store.log_spend(conn, "openai", "gpt-5.4", "judge:safety", u.get("in", 0), u.get("out", 0),
