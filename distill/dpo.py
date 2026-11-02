@@ -25,6 +25,7 @@ import json
 import os
 import random
 import traceback
+from pathlib import Path
 from collections import Counter
 from typing import Any, Dict, List
 
@@ -173,14 +174,15 @@ def _rejected(rec, out, verdict, teacher) -> str:
     return ""
 
 
-def export(student: str) -> None:
+def export(student: str, out=None) -> None:
+    out = Path(out) if out else OUT
     conn = store.connect()
     name = _student_name(student)
     run_key = f"dpo:{MODELS[name].model}"
     ids = json.loads(SELECTION.read_text())
     recs = {r["id"]: r for r in store.records(conn, split="train") if r["id"] in set(ids)}
     why, kept = Counter(), 0
-    with OUT.open("w") as fh:
+    with out.open("w") as fh:
         for rid in ids:
             rec = recs.get(rid)
             row = conn.execute("select doc from runs where record_id=? and model=?", (rid, run_key)).fetchone()
@@ -210,7 +212,7 @@ def export(student: str) -> None:
             }, ensure_ascii=False) + "\n")
             why[reason] += 1
             kept += 1
-    print(f"{OUT}: {kept} pairs  reasons={dict(why)}")
+    print(f"{out}: {kept} pairs  reasons={dict(why)}")
 
 
 def main(argv=None):
@@ -222,13 +224,14 @@ def main(argv=None):
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--concurrency", type=int, default=12)
     ap.add_argument("--cap-fireworks", type=float, default=150)
+    ap.add_argument("--out", default=None, help="export: output path (default data/export/dpo.jsonl)")
     a = ap.parse_args(argv)
     if a.what == "select":
         select(a.n, a.seed)
     elif a.what == "run":
         asyncio.run(run(a.student, a.limit, a.concurrency, a.cap_fireworks))
     else:
-        export(a.student)
+        export(a.student, a.out)
 
 
 if __name__ == "__main__":

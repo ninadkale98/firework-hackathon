@@ -36,8 +36,9 @@ SHOW = {
     REFERENCE: ("Claude Opus 5 (reference)", "frontier"),
     "deepseek-v4.1-flash": ("DeepSeek V4.1 Flash (teacher)", "open"),
     "qwen3.5-9b": ("Qwen3.5-9B base (student)", "student"),
-    "qwen3.5-9b-tuned": ("Qwen3.5-9B tuned (ours)", "student"),
-    "qwen3.5-9b-dpo": ("Qwen3.5-9B tuned + DPO (ours)", "student"),
+    "qwen3.5-9b-tuned": ("Qwen3.5-9B tuned, default temperature", "student"),
+    "qwen3.5-9b-tuned-t0": ("Qwen3.5-9B tuned (ours)", "student"),
+    "qwen3.5-9b-orpo": ("Qwen3.5-9B tuned + ORPO (ours)", "student"),
     "muse-glimmer-base": ("Muse Glimmer 30B base", "student"),
     "muse-glimmer-tuned": ("Muse Glimmer 30B tuned (ours)", "student"),
 }

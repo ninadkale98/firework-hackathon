@@ -11,6 +11,7 @@ with ``firectl model get`` once the key is in.
 
 from __future__ import annotations
 
+import functools
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -36,6 +37,8 @@ class ModelSpec:
     #: $ per 1M tokens (input, output), for the cost columns. None when unconfirmed.
     price: Optional[tuple] = None
     note: str = ""
+    #: Sampling temperature sent with every call. None leaves the provider default.
+    temperature: Optional[float] = None
 
 
 MODELS: Dict[str, ModelSpec] = {spec.name: spec for spec in (
@@ -64,11 +67,21 @@ MODELS: Dict[str, ModelSpec] = {spec.name: spec for spec in (
               "accounts/ninadnar98-z0upz59iv/models/codepraxis-interviewer-v1"
               "#accounts/ninadnar98-z0upz59iv/deployments/codepraxis-interviewer-v1",
               None, None, "on-demand B200, same shape as the base"),
+    # The same tuned model at temperature 0, the setting the Muse runs used.
+    ModelSpec("qwen3.5-9b-tuned-t0", "fireworks",
+              "accounts/ninadnar98-z0upz59iv/models/codepraxis-interviewer-v1"
+              "#accounts/ninadnar98-z0upz59iv/deployments/codepraxis-interviewer-v1",
+              None, None, "on-demand B200, temperature 0", 0.0),
     # DPO on top of the SFT LoRA (codepraxis-interviewer-dpo-v1), same shape.
     ModelSpec("qwen3.5-9b-dpo", "fireworks",
               "accounts/ninadnar98-z0upz59iv/models/codepraxis-interviewer-dpo-v1"
               "#accounts/ninadnar98-z0upz59iv/deployments/codepraxis-interviewer-dpo-v1",
               None, None, "on-demand B200, same shape as the base"),
+    # ORPO on on-policy pairs, from the SFT LoRA (codepraxis-interviewer-orpo-v1), temperature 0.
+    ModelSpec("qwen3.5-9b-orpo", "fireworks",
+              "accounts/ninadnar98-z0upz59iv/models/codepraxis-interviewer-orpo-v1"
+              "#accounts/ninadnar98-z0upz59iv/deployments/codepraxis-interviewer-orpo-v1",
+              None, None, "on-demand B200, temperature 0", 0.0),
     ModelSpec("qwen3-8b-local", "ollama", "qwen3-8b-32k", None, (0.0, 0.0)),
     # The tuned student: Muse Glimmer 30B + LoRA (serverless SFT on data/export/train.jsonl,
     # fireworks-training-runs/codepraxis-muse-v1). On-demand deployment, 1x H200 BF16.
@@ -142,6 +155,9 @@ def _completer(name: str):
     # whether or not the backend's completer takes ``base_url`` itself.
     comp = OpenAISchemaCompleter(api_key=key, model=spec.model, timeout_seconds=300.0)
     comp._client = AsyncOpenAI(api_key=key, base_url=url, timeout=300.0)
+    if spec.temperature is not None:
+        create = comp._client.chat.completions.create
+        comp._client.chat.completions.create = functools.partial(create, temperature=spec.temperature)
     return comp
 
 

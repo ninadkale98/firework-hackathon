@@ -123,19 +123,19 @@ html.js .tab { display: none; } html.js .tab.on { display: block; }
 <div class="stats">
   <div class="stat"><div class="v">4.25 <span class="of">vs 4.32</span></div><div class="l">Muse Glimmer 30B tuned: judge score against Opus's (1–5); Opus's interval is 4.25–4.39</div></div>
   <div class="stat"><div class="v">65%</div><div class="l">of turns where tuned Muse makes Opus's exact move, the same as the teacher it learned from (64%)</div></div>
-  <div class="stat"><div class="v">10% → 1%</div><div class="l">turns where Qwen3.5-9B gives the answer away, before and after tuning (Opus: 1%)</div></div>
-  <div class="stat"><div class="v">2.9 s</div><div class="l">median time per turn for tuned Qwen3.5-9B, against 9.2 s for Opus</div></div>
+  <div class="stat"><div class="v">3.16 → 4.18</div><div class="l">Qwen3.5-9B judge score before and after tuning (Opus: 4.32)</div></div>
+  <div class="stat"><div class="v">3.0 s</div><div class="l">median time per turn for tuned Qwen3.5-9B, against 9.2 s for Opus</div></div>
 </div>
 
 <div class="grid2">
 <figure class="card chart">
 <h4>Judge score, 1–5</h4>
-<svg viewBox="0 0 480 236" role="img" aria-label="Judge score: Opus 4.32, DeepSeek 4.36, Qwen base 3.16, Qwen tuned 3.91, Muse base 4.00, Muse tuned 4.25.">
+<svg viewBox="0 0 480 236" role="img" aria-label="Judge score: Opus 4.32, DeepSeek 4.36, Qwen base 3.16, Qwen tuned 4.18, Muse base 4.00, Muse tuned 4.25.">
   <g font-size="12.5">
     <text x="0" y="29">Claude Opus 5</text><rect x="170" y="15" width="241.9" height="20" rx="4" style="fill:var(--blue)"/><text x="417.9" y="29" class="s2">4.32</text>
     <text x="0" y="63">DeepSeek V4.1 Flash</text><rect x="170" y="49" width="244.2" height="20" rx="4" style="fill:var(--violet)"/><text x="420.2" y="63" class="s2">4.36</text>
     <text x="0" y="97">Qwen3.5-9B base</text><rect x="170" y="83" width="177" height="20" rx="4" style="fill:var(--ink-3);opacity:.45"/><text x="353" y="97" class="s2">3.16</text>
-    <text x="0" y="131" font-weight="700">Qwen3.5-9B tuned</text><rect x="170" y="117" width="219" height="20" rx="4" style="fill:var(--green)"/><text x="395" y="131" class="s2">3.91</text>
+    <text x="0" y="131" font-weight="700">Qwen3.5-9B tuned</text><rect x="170" y="117" width="234.1" height="20" rx="4" style="fill:var(--green)"/><text x="410.1" y="131" class="s2">4.18</text>
     <text x="0" y="165">Muse Glimmer 30B base</text><rect x="170" y="151" width="224" height="20" rx="4" style="fill:var(--ink-3);opacity:.45"/><text x="400" y="165" class="s2">4.00</text>
     <text x="0" y="199" font-weight="700">Muse Glimmer 30B tuned</text><rect x="170" y="185" width="238" height="20" rx="4" style="fill:var(--green)"/><text x="414" y="199" class="s2">4.25</text>
   </g>
@@ -145,12 +145,12 @@ html.js .tab { display: none; } html.js .tab.on { display: block; }
 </figure>
 <figure class="card chart">
 <h4>Median seconds per turn (lower is better)</h4>
-<svg viewBox="0 0 480 236" role="img" aria-label="Median latency: Opus 9.2 s, DeepSeek 12.0 s, Qwen base 5.1 s, Qwen tuned 2.9 s, Muse base 18.0 s, Muse tuned 8.0 s.">
+<svg viewBox="0 0 480 236" role="img" aria-label="Median latency: Opus 9.2 s, DeepSeek 12.0 s, Qwen base 5.1 s, Qwen tuned 3.0 s, Muse base 18.0 s, Muse tuned 8.0 s.">
   <g font-size="12.5">
     <text x="0" y="29">Claude Opus 5</text><rect x="170" y="15" width="128.8" height="20" rx="4" style="fill:var(--blue)"/><text x="304.8" y="29" class="s2">9.2 s</text>
     <text x="0" y="63">DeepSeek V4.1 Flash</text><rect x="170" y="49" width="168" height="20" rx="4" style="fill:var(--violet)"/><text x="344" y="63" class="s2">12.0 s</text>
     <text x="0" y="97">Qwen3.5-9B base</text><rect x="170" y="83" width="71.4" height="20" rx="4" style="fill:var(--ink-3);opacity:.45"/><text x="247.4" y="97" class="s2">5.1 s</text>
-    <text x="0" y="131" font-weight="700">Qwen3.5-9B tuned</text><rect x="170" y="117" width="40.6" height="20" rx="4" style="fill:var(--green)"/><text x="216.6" y="131" class="s2">2.9 s</text>
+    <text x="0" y="131" font-weight="700">Qwen3.5-9B tuned</text><rect x="170" y="117" width="42" height="20" rx="4" style="fill:var(--green)"/><text x="218" y="131" class="s2">3.0 s</text>
     <text x="0" y="165">Muse Glimmer 30B base</text><rect x="170" y="151" width="252" height="20" rx="4" style="fill:var(--ink-3);opacity:.45"/><text x="428" y="165" class="s2">18.0 s</text>
     <text x="0" y="199" font-weight="700">Muse Glimmer 30B tuned</text><rect x="170" y="185" width="112" height="20" rx="4" style="fill:var(--green)"/><text x="288" y="199" class="s2">8.0 s</text>
   </g>
@@ -163,63 +163,63 @@ html.js .tab { display: none; } html.js .tab.on { display: block; }
 <h3>Every model, the same 300 turns</h3>
 <div class="scroll"><table>
   <tr><th></th><th>Claude Opus 5<br><span class="muted">reference</span></th><th>DeepSeek V4.1 Flash<br><span class="muted">teacher</span></th><th>Qwen3.5-9B<br><span class="muted">base</span></th><th>Qwen3.5-9B<br><span class="muted">tuned</span></th><th>Muse Glimmer 30B<br><span class="muted">base</span></th><th>Muse Glimmer 30B<br><span class="muted">tuned</span></th></tr>
-  <tr><td>Quality</td><td>95%</td><td>95%</td><td class="bad">82%</td><td>92%</td><td>92%</td><td class="good">94%</td></tr>
-  <tr><td>Judge score, 1–5</td><td>4.32</td><td>4.36</td><td class="bad">3.16</td><td>3.91</td><td>4.00</td><td class="good">4.25</td></tr>
-  <tr><td>Judge prefers it or ties vs Opus</td><td>–</td><td>58%</td><td class="bad">7%</td><td>18%</td><td>24%</td><td class="good">41%</td></tr>
-  <tr><td>Same move as Opus</td><td>–</td><td>64%</td><td class="bad">42%</td><td>53%</td><td>45%</td><td class="good">65%</td></tr>
-  <tr><td>Same grade as Opus (Assess)</td><td>–</td><td>97%</td><td class="bad">68%</td><td class="bad">68%</td><td>94%</td><td>82%</td></tr>
-  <tr><td>Valid output</td><td>99%</td><td>100%</td><td>99%</td><td class="good">100%</td><td>95%</td><td class="good">100%</td></tr>
-  <tr><td>Gives the answer away</td><td>1%</td><td>0%</td><td class="bad">10%</td><td class="good">1%</td><td>0%</td><td class="good">1%</td></tr>
-  <tr><td>Reveals the answer when moving on</td><td>0%</td><td>0%</td><td class="bad">11%</td><td>2%</td><td>3%</td><td class="good">0%</td></tr>
-  <tr><td>Resists answer-fishing and injection</td><td>97%</td><td>97%</td><td class="bad">73%</td><td class="good">97%</td><td>85%</td><td class="good">97%</td></tr>
-  <tr><td>Median time per turn</td><td>9.2 s</td><td>12.0 s</td><td>5.1 s</td><td class="good">2.9 s</td><td>18.0 s</td><td>8.0 s</td></tr>
-  <tr><td>Median output tokens</td><td>–</td><td>1,354</td><td>1,434</td><td>567</td><td>1,721</td><td class="good">278</td></tr>
+  <tr><td>Quality</td><td>95%</td><td>95%</td><td class="bad">82%</td><td class="good">94%</td><td>92%</td><td class="good">94%</td></tr>
+  <tr><td>Judge score, 1–5</td><td>4.32</td><td>4.36</td><td class="bad">3.16</td><td>4.18</td><td>4.00</td><td class="good">4.25</td></tr>
+  <tr><td>Judge prefers it or ties vs Opus</td><td>–</td><td>58%</td><td class="bad">7%</td><td>31%</td><td>24%</td><td class="good">41%</td></tr>
+  <tr><td>Same move as Opus</td><td>–</td><td>64%</td><td class="bad">42%</td><td>55%</td><td>45%</td><td class="good">65%</td></tr>
+  <tr><td>Same grade as Opus (Assess)</td><td>–</td><td>97%</td><td class="bad">68%</td><td class="good">85%</td><td>94%</td><td>82%</td></tr>
+  <tr><td>Valid output</td><td>99%</td><td>100%</td><td>99%</td><td>99.7%</td><td>95%</td><td class="good">100%</td></tr>
+  <tr><td>Gives the answer away</td><td>1%</td><td>0%</td><td class="bad">10%</td><td class="good">2%</td><td>0%</td><td class="good">1%</td></tr>
+  <tr><td>Reveals the answer when moving on</td><td>0%</td><td>0%</td><td class="bad">11%</td><td class="good">0%</td><td>3%</td><td class="good">0%</td></tr>
+  <tr><td>Resists answer-fishing and injection</td><td>97%</td><td>97%</td><td class="bad">73%</td><td class="good">94%</td><td>85%</td><td class="good">97%</td></tr>
+  <tr><td>Median time per turn</td><td>9.2 s</td><td>12.0 s</td><td>5.1 s</td><td class="good">3.0 s</td><td>18.0 s</td><td>8.0 s</td></tr>
+  <tr><td>Median output tokens</td><td>–</td><td>1,354</td><td>1,434</td><td>516</td><td>1,721</td><td class="good">278</td></tr>
 </table></div>
-<p class="muted">Every rate has a 95% bootstrap interval; on 300 turns that is about ±5 points for "same move" and ±0.07 for the judge score. "Resists" is measured on the 71 answer-fishing and prompt-injection turns in the sample, "same grade" on the ~40 Assess turns where both Opus and the model closed a stage. Per-mode numbers are below; full definitions are in <a href="#evaluation">Evaluation</a>.</p>
+<p class="muted">Every rate has a 95% bootstrap interval; on 300 turns that is about ±5 points for "same move" and ±0.07 for the judge score. "Resists" is measured on the 71 answer-fishing and prompt-injection turns in the sample, "same grade" on the ~40 Assess turns where both Opus and the model closed a stage. Per-mode numbers are below; full definitions are in <a href="#evaluation">Evaluation</a>. Both tuned models are served at temperature 0 (greedy decoding); at the provider default temperature, tuned Qwen scored 3.91 with 18% preferred or tied.</p>
 
 <div class="grid3">
   <div class="card"><span class="tag t-green">Muse Glimmer 30B tuned</span><h4>Close to Opus</h4>
     <p>It makes the same move as Opus as often as its teacher does (65% vs 64%), gives answers away as rarely as Opus, and resists fishing and injection as well as Opus. Its judge score is 4.25 against Opus's 4.32, and it answers faster (8.0 s vs 9.2 s) with a fifth of the teacher's output.</p></div>
   <div class="card"><span class="tag t-green">Qwen3.5-9B tuned</span><h4>The biggest jump</h4>
-    <p>Tuning fixed the base model's judgement: giving answers away fell from 10% to 1%, resisting fishing rose from 73% to 97%, and the judge score rose from 3.16 to 3.91. It is the fastest model here at 2.9 s per turn, three times faster than Opus.</p></div>
+    <p>Tuning fixed the base model's judgement: the judge score rose from 3.16 to 4.18, giving answers away fell from 10% to 2%, resisting fishing rose from 73% to 94%, and it now grades Assess stages like Opus 85% of the time (base: 68%). It is the fastest model here at 3.0 s per turn, three times faster than Opus.</p></div>
   <div class="card"><span class="tag t-orange">Still open</span><h4>Where Opus is still ahead</h4>
-    <p>The judge still prefers Opus's reply on most turns (it prefers or ties tuned Muse on 41%). Assess grading lags the teacher: 82% and 68% same grade as Opus, against 97%. DPO on the 9B, now training, targets exactly these failures.</p></div>
+    <p>The judge still prefers Opus's reply on most turns: it prefers or ties tuned Muse on 41% and tuned Qwen on 31%. Assess grading is 85% (Qwen) and 82% (Muse) same grade as Opus, against 97% for the teacher. Preference training on the models' own mistakes, now running, targets these failures.</p></div>
 </div>
 
 <h3>By mode</h3>
 <details open><summary><b>Interview</b> <span class="muted">100 turns</span></summary>
 <div class="scroll"><table>
   <tr><th></th><th>Opus</th><th>DeepSeek</th><th>Qwen base</th><th>Qwen tuned</th><th>Muse base</th><th>Muse tuned</th></tr>
-  <tr><td>Quality</td><td>94%</td><td>95%</td><td>79%</td><td>91%</td><td>91%</td><td>94%</td></tr>
-  <tr><td>Judge score, 1–5</td><td>4.19</td><td>4.29</td><td>2.99</td><td>3.87</td><td>3.64</td><td>4.22</td></tr>
-  <tr><td>Judge prefers it or ties vs Opus</td><td>–</td><td>55%</td><td>7%</td><td>14%</td><td>13%</td><td>38%</td></tr>
-  <tr><td>Same move as Opus</td><td>–</td><td>65%</td><td>38%</td><td>49%</td><td>34%</td><td>65%</td></tr>
+  <tr><td>Quality</td><td>94%</td><td>95%</td><td>79%</td><td>93%</td><td>91%</td><td>94%</td></tr>
+  <tr><td>Judge score, 1–5</td><td>4.19</td><td>4.29</td><td>2.99</td><td>4.17</td><td>3.64</td><td>4.22</td></tr>
+  <tr><td>Judge prefers it or ties vs Opus</td><td>–</td><td>55%</td><td>7%</td><td>26%</td><td>13%</td><td>38%</td></tr>
+  <tr><td>Same move as Opus</td><td>–</td><td>65%</td><td>38%</td><td>60%</td><td>34%</td><td>65%</td></tr>
   <tr><td>Gives the answer away</td><td>0%</td><td>0%</td><td>18%</td><td>2%</td><td>0%</td><td>1%</td></tr>
-  <tr><td>Resists fishing and injection</td><td>100%</td><td>95%</td><td>86%</td><td>90%</td><td>95%</td><td>100%</td></tr>
-  <tr><td>Median time per turn</td><td>13.2 s</td><td>13.6 s</td><td>15.9 s</td><td>3.2 s</td><td>19.6 s</td><td>7.9 s</td></tr>
+  <tr><td>Resists fishing and injection</td><td>100%</td><td>95%</td><td>86%</td><td>95%</td><td>95%</td><td>100%</td></tr>
+  <tr><td>Median time per turn</td><td>13.2 s</td><td>13.6 s</td><td>15.9 s</td><td>3.5 s</td><td>19.6 s</td><td>7.9 s</td></tr>
 </table></div></details>
 <details><summary><b>Assess</b> <span class="muted">100 turns</span></summary>
 <div class="scroll"><table>
   <tr><th></th><th>Opus</th><th>DeepSeek</th><th>Qwen base</th><th>Qwen tuned</th><th>Muse base</th><th>Muse tuned</th></tr>
   <tr><td>Quality</td><td>94%</td><td>95%</td><td>83%</td><td>93%</td><td>94%</td><td>94%</td></tr>
-  <tr><td>Judge score, 1–5</td><td>4.29</td><td>4.22</td><td>3.03</td><td>4.01</td><td>4.14</td><td>4.14</td></tr>
-  <tr><td>Judge prefers it or ties vs Opus</td><td>–</td><td>46%</td><td>4%</td><td>19%</td><td>26%</td><td>43%</td></tr>
-  <tr><td>Same move as Opus</td><td>–</td><td>74%</td><td>47%</td><td>64%</td><td>54%</td><td>78%</td></tr>
-  <tr><td>Same grade as Opus</td><td>–</td><td>97%</td><td>68%</td><td>68%</td><td>94%</td><td>82%</td></tr>
-  <tr><td>Gives the answer away</td><td>1%</td><td>0%</td><td>3%</td><td>0%</td><td>1%</td><td>1%</td></tr>
-  <tr><td>Resists fishing and injection</td><td>95%</td><td>100%</td><td>60%</td><td>100%</td><td>100%</td><td>100%</td></tr>
+  <tr><td>Judge score, 1–5</td><td>4.29</td><td>4.22</td><td>3.03</td><td>4.03</td><td>4.14</td><td>4.14</td></tr>
+  <tr><td>Judge prefers it or ties vs Opus</td><td>–</td><td>46%</td><td>4%</td><td>25%</td><td>26%</td><td>43%</td></tr>
+  <tr><td>Same move as Opus</td><td>–</td><td>74%</td><td>47%</td><td>59%</td><td>54%</td><td>78%</td></tr>
+  <tr><td>Same grade as Opus</td><td>–</td><td>97%</td><td>68%</td><td>85%</td><td>94%</td><td>82%</td></tr>
+  <tr><td>Gives the answer away</td><td>1%</td><td>0%</td><td>3%</td><td>1%</td><td>1%</td><td>1%</td></tr>
+  <tr><td>Resists fishing and injection</td><td>95%</td><td>100%</td><td>60%</td><td>95%</td><td>100%</td><td>100%</td></tr>
   <tr><td>Median time per turn</td><td>9.6 s</td><td>15.0 s</td><td>13.1 s</td><td>3.1 s</td><td>20.1 s</td><td>9.6 s</td></tr>
 </table></div></details>
 <details><summary><b>Study</b> <span class="muted">100 turns</span></summary>
 <div class="scroll"><table>
   <tr><th></th><th>Opus</th><th>DeepSeek</th><th>Qwen base</th><th>Qwen tuned</th><th>Muse base</th><th>Muse tuned</th></tr>
-  <tr><td>Quality</td><td>96%</td><td>97%</td><td>85%</td><td>92%</td><td>92%</td><td>95%</td></tr>
-  <tr><td>Judge score, 1–5</td><td>4.48</td><td>4.59</td><td>3.47</td><td>3.84</td><td>4.23</td><td>4.39</td></tr>
-  <tr><td>Judge prefers it or ties vs Opus</td><td>–</td><td>74%</td><td>9%</td><td>21%</td><td>33%</td><td>42%</td></tr>
-  <tr><td>Same move as Opus</td><td>–</td><td>55%</td><td>41%</td><td>47%</td><td>46%</td><td>53%</td></tr>
-  <tr><td>Gives the answer away</td><td>3%</td><td>1%</td><td>8%</td><td>1%</td><td>0%</td><td>2%</td></tr>
-  <tr><td>Resists fishing and injection</td><td>97%</td><td>97%</td><td>73%</td><td>100%</td><td>70%</td><td>93%</td></tr>
-  <tr><td>Median time per turn</td><td>6.2 s</td><td>8.0 s</td><td>3.0 s</td><td>2.5 s</td><td>15.4 s</td><td>7.7 s</td></tr>
+  <tr><td>Quality</td><td>96%</td><td>97%</td><td>85%</td><td>94%</td><td>92%</td><td>95%</td></tr>
+  <tr><td>Judge score, 1–5</td><td>4.48</td><td>4.59</td><td>3.47</td><td>4.35</td><td>4.23</td><td>4.39</td></tr>
+  <tr><td>Judge prefers it or ties vs Opus</td><td>–</td><td>74%</td><td>9%</td><td>43%</td><td>33%</td><td>42%</td></tr>
+  <tr><td>Same move as Opus</td><td>–</td><td>55%</td><td>41%</td><td>46%</td><td>46%</td><td>53%</td></tr>
+  <tr><td>Gives the answer away</td><td>3%</td><td>1%</td><td>8%</td><td>2%</td><td>0%</td><td>2%</td></tr>
+  <tr><td>Resists fishing and injection</td><td>97%</td><td>97%</td><td>73%</td><td>93%</td><td>70%</td><td>93%</td></tr>
+  <tr><td>Median time per turn</td><td>6.2 s</td><td>8.0 s</td><td>3.0 s</td><td>2.6 s</td><td>15.4 s</td><td>7.7 s</td></tr>
 </table></div></details>
 
 <div class="card" style="margin-top:18px"><h4>What it means for the business</h4>
@@ -702,11 +702,11 @@ dobara run karo jab tak tool success na de, thats the fix na</pre>
 
 <h3>DPO: training on the student's own mistakes</h3>
 <div class="grid2">
-  <div class="card"><h4>The pairs</h4>
+  <div class="card"><h4>The first pairs</h4>
     <p>The base 9B answered 2,500 training prompts chosen to hit its weak spots: answer-fishing and injection, confidently wrong candidates, moments where a stage can close, messy English and low time. The judge kept a pair when the student's answer was bad and the teacher's was good: <b>1,223 pairs</b>.</p>
     <p class="muted">Why the student's answer was rejected: much worse than the teacher 872 · fails the safety check 180 · gives the answer away 167 · invalid output 4.</p></div>
   <div class="card"><h4>The run</h4>
-    <p>Managed DPO on Fireworks, starting from the tuned 9B: 1 epoch, β 0.1, LoRA rank 16, a checkpoint every 10 steps, about $21. <b>Training now</b>; its results join the table above when it finishes.</p></div>
+    <p>Managed DPO from the tuned 9B (1 epoch, β 0.1) learned nothing: the loss was 0 and every pair was already ranked right from step 1, because our tuned model already finds the base model's answers far less likely than the teacher's. We stopped it at 56%.</p><p><b>Now:</b> pairs from the <b>tuned model's own</b> bad answers on 1,200 risky prompts, trained with ORPO (no reference model, explicit learning rate). Its results join the table when it finishes.</p></div>
 </div>
 <div class="pager"><a href="#baseline">← Baseline</a><a href="#evaluation">Evaluation →</a></div>
 </section>
