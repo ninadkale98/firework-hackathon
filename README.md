@@ -70,7 +70,7 @@ Every score comes with 95% bootstrap confidence intervals, broken down by task a
 | `distill/export.py` | records → Fireworks SFT JSONL |
 | `STUDY.md` | the methods used: distillation, SFT, LoRA, DPO, RFT, LLM-as-judge, quantization |
 
-The question content, the generated data and the API keys are kept out of this repository: the questions carry interview answer keys.
+The question content and generated data are in the data repo (below); API keys are never committed.
 
 ## Running
 
@@ -86,7 +86,7 @@ PYTHONPATH=../../backend:. python -m distill.export --split train
 
 ## Continuing on another machine
 
-The data (test set, training set, question bank, plan, logs) lives in a **private** repo, `ninadkale98/firework-hackathon-data`, because it contains interview answer keys. Its README has the full restore steps. In short:
+The data (test set, training set, question bank, plan, logs) lives in [`ninadkale98/firework-hackathon-data`](https://github.com/ninadkale98/firework-hackathon-data). Its README has the full restore steps. To evaluate another model, use `data/export/test_eval.jsonl` there. In short:
 
 1. Clone this repo and `codepraxis-org/backend` (private) at commit `ccee1c5`, which the data was made with. Create the backend venv.
 2. Clone the data repo and unpack it into this folder with `zstd -d …`: `data/distill.db`, `data/export/*.jsonl`, `data/bank/`, `questions/`, `PLAN.md`.
