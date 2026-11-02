@@ -12,9 +12,11 @@ CodePraxis runs AI technical interviews and a Learn tutor with Claude. Each turn
 
 The model picks one move — follow up, hint, clarify, redirect, probe deeper, or close the question — and writes what the candidate reads.
 
-**The goal:** fine-tune **Qwen3.5-9B** on Fireworks to make the same decisions as Claude Opus. The dimension we push is **cost and latency at equal quality**: a 2-day screening round for 50K students costs ~$50K on Opus and ~$2K on a tuned 9B.
+**The goal:** fine-tune small open models (**Qwen3.5-9B** and **Muse Glimmer 30B**) on Fireworks to make the same decisions as Claude Opus. The dimension we push is **cost and latency at equal quality**: a 2-day screening round for 50K students costs ~$50K on Opus and ~$2K on a tuned 9B.
 
-**Presentation:** [architecture, baseline and evaluation](https://ninadkale98.github.io/firework-hackathon/presentation.html) · [live leaderboard](https://ninadkale98.github.io/firework-hackathon/)
+**Write-up (results, architecture, baseline, training, evaluation):** https://ninadkale98.github.io/firework-hackathon/ · [leaderboard](https://ninadkale98.github.io/firework-hackathon/leaderboard.html)
+
+**Result (300 held-out test turns, one judge for every model):** Muse Glimmer 30B tuned scores 4.25 against Opus's 4.32 (judge, 1–5), makes Opus's move 65% of the time (teacher 64%), and gives the answer away as rarely as Opus (1%). Qwen3.5-9B tuned cuts giving the answer away from 10% to 1%, raises resisting answer-fishing from 73% to 97%, and answers in 2.9 s against Opus's 9.2 s. DPO on the 9B is training.
 
 ## How it works
 

@@ -1,6 +1,6 @@
-"""The public leaderboard page: ``index.html`` at the repo root (GitHub Pages).
+"""The public leaderboard page: ``leaderboard.html`` at the repo root (GitHub Pages).
 
-    python -m distill.site            # reads data/distill.db, writes index.html
+    python -m distill.site            # reads data/distill.db, writes leaderboard.html
 
 Only aggregates leave the database: no question text, rubric, prompt or reply is
 written to the page, because the repository is public and the questions carry
@@ -14,10 +14,13 @@ from __future__ import annotations
 
 import html
 import json
+import os
 import statistics
 from collections import defaultdict
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+
+os.environ.setdefault("DISTILL_JUDGE_MODEL", "deepseek-v4.1-flash")
 
 from distill import judge as J
 from distill import store
@@ -35,6 +38,8 @@ SHOW = {
     "qwen3.5-9b": ("Qwen3.5-9B base (student)", "student"),
     "qwen3.5-9b-tuned": ("Qwen3.5-9B tuned (ours)", "student"),
     "qwen3.5-9b-dpo": ("Qwen3.5-9B tuned + DPO (ours)", "student"),
+    "muse-glimmer-base": ("Muse Glimmer 30B base", "student"),
+    "muse-glimmer-tuned": ("Muse Glimmer 30B tuned (ours)", "student"),
 }
 GROUPS = {"frontier": "Frontier reference", "open": "Open teacher (writes the training data)", "student": "Our student, 9B"}
 TASKS = ["interview", "assess", "study"]
@@ -142,7 +147,8 @@ def collect() -> Dict[str, Any]:
             sb = scores[m].get(b, {}).get("rules")
             if sa and sb and sa.get("move") and sb.get("move"):
                 same.append(float(sa["move"] == sb["move"]))
-        out["robust"][m] = _rate(same)
+        # Only models that answered every pair: a partial run is not comparable.
+        out["robust"][m] = _rate(same) if len(same) >= len(pairs) * 0.9 else None
     # The teacher was chosen earlier among five open models (Kimi K3, Qwen 3.8 Max,
     # DeepSeek V4.1 Flash, gpt-oss-120b, GLM 5.3) by the rule fixed before results.
     out["teacher"] = {t: {"model": "deepseek-v4.1-flash"} for t in TASKS}
@@ -244,7 +250,7 @@ ul.notes li { margin: 4px 0; }
   <p class="lede">Every turn of a CodePraxis AI interview, and of its Learn tutor (Study) and Learn assessment (Assess), is one model call. The call reads the question, the clocks, the files, the conversation and a rubric it must never reveal, and returns one JSON move. We froze a test set of turns where <b>Claude Opus 5</b> was the interviewer, then had every other model answer the exact same prompts.</p>
   <div class="tiles" id="tiles"></div>
   <p class="muted" id="meta"></p>
-  <p><a href="presentation.html">How the three agents work, the baseline and the evaluation &rarr;</a></p>
+  <p><a href="index.html">The full write-up: results, architecture, baseline, training and evaluation &rarr;</a></p>
 
   <div class="tabs" role="tablist" id="tabs"></div>
   <h2>Quality against cost and speed</h2>
@@ -260,7 +266,7 @@ ul.notes li { margin: 4px 0; }
   <p class="muted">Qwen3.5-9B runs on its own rented GPU, billed per hour rather than per token, so it has no point on the cost chart until the cost is measured under load.</p>
 
   <h2>Leaderboard</h2>
-  <p class="muted">The shared sample is stratified by task and candidate persona, and every model answered all of it. "Same move" is agreement with Opus's move. "Win/tie" is the judge's head-to-head verdict against Opus's reply, in randomised order. "Gives answer away" is each mode's own rule, judged by AI: the interviewer must not spoon-feed; the examiner must not teach or reveal a rubric point; the tutor may explain but must not hand over an exercise or reference solution or assessment answers. "Same grade" compares the strong / ok / weak grade on the Assess turns where both Opus and the model closed a stage. "Resists" is the safety judge on turns where the candidate fished for the answer or tried to manipulate the interviewer. The judge is GPT-5.4 and strict: it marks Opus too, so read these columns relative to Opus.</p>
+  <p class="muted">The shared sample is stratified by task and candidate persona, and every model answered all of it. "Same move" is agreement with Opus's move. "Win/tie" is the judge's head-to-head verdict against Opus's reply, in randomised order. "Gives answer away" is each mode's own rule, judged by AI: the interviewer must not spoon-feed; the examiner must not teach or reveal a rubric point; the tutor may explain but must not hand over an exercise or reference solution or assessment answers. "Same grade" compares the strong / ok / weak grade on the Assess turns where both Opus and the model closed a stage. "Resists" is the safety judge on turns where the candidate fished for the answer or tried to manipulate the interviewer. The judge is DeepSeek V4.1 Flash for every model (checked against GPT-5.4: within one point on 95% of replies) and strict: it marks Opus too, so read these columns relative to Opus.</p>
   <div class="scroll"><table id="board"></table></div>
 
   <h2>Robustness to messy English</h2>
@@ -275,7 +281,7 @@ ul.notes li { margin: 4px 0; }
     <li>The test questions are held out from training, two per interview track (embedded, frontend, backend, AI engineering), plus three Learn sub-modules.</li>
     <li>Neither Claude's nor GPT's outputs are used as training targets. The fine-tuning data comes from DeepSeek V4.1 Flash, chosen among five open models (Kimi K3, Qwen 3.8 Max, DeepSeek V4.1 Flash, gpt-oss-120b, GLM 5.3) by a rule fixed before the results: licence allows training on outputs, no worse than Opus at giving answers away, best quality, cheaper on a tie.</li>
   </ul>
-  <p class="muted">Code: <a href="https://github.com/ninadkale98/firework-hackathon">github.com/ninadkale98/firework-hackathon</a>. The questions, prompts and generated data are not published, because they contain interview answer keys.</p>
+  <p class="muted">Code: <a href="https://github.com/ninadkale98/firework-hackathon">github.com/ninadkale98/firework-hackathon</a>. Data, including the frozen test set as one file for evaluating any model: <a href="https://github.com/ninadkale98/firework-hackathon-data">github.com/ninadkale98/firework-hackathon-data</a>.</p>
 </main>
 <script>
 const D = __DATA__;
@@ -429,6 +435,6 @@ draw(); addEventListener("resize", draw);
 
 if __name__ == "__main__":
     data = collect()
-    (store.ROOT / "index.html").write_text(render(data))
+    (store.ROOT / "leaderboard.html").write_text(render(data))
     (store.ROOT / "data" / "board_site.json").write_text(json.dumps(data, indent=1, default=str))
-    print("wrote", store.ROOT / "index.html")
+    print("wrote", store.ROOT / "leaderboard.html")

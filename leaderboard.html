@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interviewer Model Leaderboard</title>
+<meta name="description" content="An open 9B model fine-tuned to run AI technical interviews, scored against Claude Opus on a frozen test set.">
+<style>
+:root {
+  color-scheme: light;
+  --surface: #fcfcfb; --surface-2: #f3f2ef; --border: #e2e0da;
+  --ink: #0b0b0b; --ink-2: #52514e; --ink-3: #7a7974;
+  --g-frontier: #2a78d6; --g-open: #eb6834; --g-student: #1baf7a;
+  --grid: #e9e7e1; --accent: #2a78d6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface: #1a1a19; --surface-2: #232321; --border: #34332f;
+    --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #8f8e86;
+    --g-frontier: #3987e5; --g-open: #d95926; --g-student: #199e70;
+    --grid: #2c2b28; --accent: #3987e5;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #1a1a19; --surface-2: #232321; --border: #34332f;
+  --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #8f8e86;
+  --g-frontier: #3987e5; --g-open: #d95926; --g-student: #199e70;
+  --grid: #2c2b28; --accent: #3987e5;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--surface); color: var(--ink);
+  font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 1080px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: 28px; line-height: 1.2; margin: 0 0 8px; letter-spacing: -0.01em; }
+h2 { font-size: 19px; margin: 40px 0 6px; }
+p.lede { color: var(--ink-2); margin: 0 0 20px; max-width: 760px; }
+.muted { color: var(--ink-3); font-size: 13px; }
+a { color: var(--accent); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 20px 0 8px; }
+.tile { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.tile .k { color: var(--ink-2); font-size: 13px; }
+.tile .v { font-size: 26px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.tile .s { color: var(--ink-3); font-size: 12px; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+.tabs button { font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--border); background: transparent; color: var(--ink-2); }
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th, td { padding: 9px 12px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--border); }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--ink-2); font-weight: 600; background: var(--surface-2); position: sticky; top: 0; }
+tr:last-child td { border-bottom: 0; }
+td .ci { color: var(--ink-3); font-size: 11.5px; margin-left: 4px; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.chart { border: 1px solid var(--border); border-radius: 10px; padding: 12px 12px 4px; position: relative; }
+.chart h3 { font-size: 14px; margin: 2px 4px 6px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); margin: 8px 0 0; }
+svg text { fill: var(--ink-2); font-size: 11px; }
+svg .lab { fill: var(--ink); font-size: 11.5px; }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--surface); font-size: 12px;
+  padding: 6px 8px; border-radius: 6px; opacity: 0; transition: opacity .1s; white-space: nowrap; }
+ul.notes { color: var(--ink-2); padding-left: 18px; }
+ul.notes li { margin: 4px 0; }
+.theme { position: fixed; top: 12px; right: 12px; font: inherit; font-size: 12px; padding: 5px 10px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface-2); color: var(--ink-2); cursor: pointer; }
+</style>
+</head>
+<body>
+<button class="theme" id="theme" type="button" aria-label="Switch colour theme">Theme</button>
+<main>
+  <h1>Can a 9B open model run a technical interview like Claude Opus?</h1>
+  <p class="lede">Every turn of a CodePraxis AI interview, and of its Learn tutor (Study) and Learn assessment (Assess), is one model call. The call reads the question, the clocks, the files, the conversation and a rubric it must never reveal, and returns one JSON move. We froze a test set of turns where <b>Claude Opus 5</b> was the interviewer, then had every other model answer the exact same prompts.</p>
+  <div class="tiles" id="tiles"></div>
+  <p class="muted" id="meta"></p>
+  <p><a href="index.html">The full write-up: results, architecture, baseline, training and evaluation &rarr;</a></p>
+
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <h2>Quality against cost and speed</h2>
+  <p class="muted">Quality is the per-turn mean of three things: valid output, rules kept (the AI judge finds no spoon-feeding, and on turns where the candidate fished for the answer or tried to manipulate the interviewer, it stayed in role, revealed nothing and redirected), and the judge's 1–5 score scaled to 1. It is measured on the shared sample, with 95% bootstrap intervals in the table. The x axes are log scale.</p>
+  <div class="charts">
+    <div class="chart" id="c-cost"><h3>Quality vs cost per turn (US$)</h3></div>
+    <div class="chart" id="c-lat"><h3>Quality vs median latency per turn (s)</h3></div>
+  </div>
+  <h2 id="gap-h">Where the 9B falls short</h2>
+  <p class="muted" id="gap-note"></p>
+  <div class="chart" id="c-gap"></div>
+  <div class="legend" id="legend"></div>
+  <p class="muted">Qwen3.5-9B runs on its own rented GPU, billed per hour rather than per token, so it has no point on the cost chart until the cost is measured under load.</p>
+
+  <h2>Leaderboard</h2>
+  <p class="muted">The shared sample is stratified by task and candidate persona, and every model answered all of it. "Same move" is agreement with Opus's move. "Win/tie" is the judge's head-to-head verdict against Opus's reply, in randomised order. "Gives answer away" is each mode's own rule, judged by AI: the interviewer must not spoon-feed; the examiner must not teach or reveal a rubric point; the tutor may explain but must not hand over an exercise or reference solution or assessment answers. "Same grade" compares the strong / ok / weak grade on the Assess turns where both Opus and the model closed a stage. "Resists" is the safety judge on turns where the candidate fished for the answer or tried to manipulate the interviewer. The judge is DeepSeek V4.1 Flash for every model (checked against GPT-5.4: within one point on 95% of replies) and strict: it marks Opus too, so read these columns relative to Opus.</p>
+  <div class="scroll"><table id="board"></table></div>
+
+  <h2>Robustness to messy English</h2>
+  <p class="muted">The same candidate answer was given clean and rewritten messily (typos, SMS spelling, dictation fillers). Each column is the share of pairs where the model chose the same move both times.</p>
+  <div class="scroll"><table id="robust"></table></div>
+
+  <h2>How the test set was made</h2>
+  <ul class="notes">
+    <li>Sessions run through the <b>production engine</b>: session service, driver, prompt and schema builders, checks. Only storage is in memory and the clock is fake. Every prompt is byte-identical to production.</li>
+    <li>The candidates are simulated by GPT: 10 personas (strong, partial, confidently wrong, "I don't know", fishing for the answer, off-topic, prompt injection, terse, code-pasting, slow) and 8 writing styles, Hinglish included. Drawings go through the production Excalidraw normaliser.</li>
+    <li>Coverage is measured per prompt field: clocks, depth, hints, probe options, the set of moves offered, history length, files, Learn notes, gaps and memory. Clock edge cases and messy rewrites were replayed through the production prompt builder.</li>
+    <li>The test questions are held out from training, two per interview track (embedded, frontend, backend, AI engineering), plus three Learn sub-modules.</li>
+    <li>Neither Claude's nor GPT's outputs are used as training targets. The fine-tuning data comes from DeepSeek V4.1 Flash, chosen among five open models (Kimi K3, Qwen 3.8 Max, DeepSeek V4.1 Flash, gpt-oss-120b, GLM 5.3) by a rule fixed before the results: licence allows training on outputs, no worse than Opus at giving answers away, best quality, cheaper on a tie.</li>
+  </ul>
+  <p class="muted">Code: <a href="https://github.com/ninadkale98/firework-hackathon">github.com/ninadkale98/firework-hackathon</a>. Data, including the frozen test set as one file for evaluating any model: <a href="https://github.com/ninadkale98/firework-hackathon-data">github.com/ninadkale98/firework-hackathon-data</a>.</p>
+</main>
+<script>
+const D = {"sample": {"reference": {"interview": {"n": 100, "quality": {"v": 0.9426666666666667, "lo": 0.9293333333333332, "hi": 0.9533333333333333, "n": 100}, "format": {"v": 0.99, "lo": 0.97, "hi": 1.0, "n": 100}, "rules": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "leak": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 100}, "safety": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 21}, "reveal_closing": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 46}, "same_move": null, "same_grade": null, "judge": {"v": 4.19, "lo": 4.06, "hi": 4.31, "n": 100}, "win_tie": null, "p50_ms": 13213, "usd_turn": 0.062275}, "assess": {"n": 100, "quality": {"v": 0.9426666666666667, "lo": 0.9193333333333332, "hi": 0.958, "n": 100}, "format": {"v": 0.99, "lo": 0.97, "hi": 1.0, "n": 100}, "rules": {"v": 0.98, "lo": 0.95, "hi": 1.0, "n": 100}, "leak": {"v": 0.01, "lo": 0.0, "hi": 0.03, "n": 100}, "safety": {"v": 0.95, "lo": 0.85, "hi": 1.0, "n": 20}, "reveal_closing": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 41}, "same_move": null, "same_grade": null, "judge": {"v": 4.29, "lo": 4.16, "hi": 4.41, "n": 100}, "win_tie": null, "p50_ms": 9562, "usd_turn": 0.035395}, "study": {"n": 100, "quality": {"v": 0.9553333333333334, "lo": 0.9353333333333333, "hi": 0.9706666666666667, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "rules": {"v": 0.97, "lo": 0.93, "hi": 1.0, "n": 100}, "leak": {"v": 0.03, "lo": 0.0, "hi": 0.07, "n": 100}, "safety": {"v": 0.9666666666666667, "lo": 0.9, "hi": 1.0, "n": 30}, "reveal_closing": null, "same_move": null, "same_grade": null, "judge": {"v": 4.48, "lo": 4.34, "hi": 4.6, "n": 100}, "win_tie": null, "p50_ms": 6187, "usd_turn": 0.017585}}, "deepseek-v4.1-flash": {"interview": {"n": 100, "quality": {"v": 0.9493333333333333, "lo": 0.9393333333333332, "hi": 0.9586666666666666, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "rules": {"v": 0.99, "lo": 0.97, "hi": 1.0, "n": 100}, "leak": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 100}, "safety": {"v": 0.9523809523809523, "lo": 0.8571428571428571, "hi": 1.0, "n": 21}, "reveal_closing": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 49}, "same_move": {"v": 0.6464646464646465, "lo": 0.5555555555555556, "hi": 0.7373737373737373, "n": 99}, "same_grade": null, "judge": {"v": 4.29, "lo": 4.18, "hi": 4.39, "n": 100}, "win_tie": {"v": 0.55, "lo": 0.46, "hi": 0.64, "n": 100}, "p50_ms": 13610, "usd_turn": 0.0044919}, "assess": {"n": 100, "quality": {"v": 0.948, "lo": 0.9406666666666667, "hi": 0.956, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "rules": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "leak": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 100}, "safety": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 20}, "reveal_closing": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 62}, "same_move": {"v": 0.7373737373737373, "lo": 0.6464646464646465, "hi": 0.8181818181818182, "n": 99}, "same_grade": {"v": 0.9736842105263158, "lo": 0.9210526315789473, "hi": 1.0, "n": 38}, "judge": {"v": 4.22, "lo": 4.11, "hi": 4.34, "n": 100}, "win_tie": {"v": 0.46, "lo": 0.36, "hi": 0.55, "n": 100}, "p50_ms": 14973, "usd_turn": 0.0051585}, "study": {"n": 100, "quality": {"v": 0.9656565656565655, "lo": 0.9515151515151515, "hi": 0.9771043771043771, "n": 99}, "format": {"v": 0.99, "lo": 0.96, "hi": 1.0, "n": 100}, "rules": {"v": 0.9797979797979798, "lo": 0.9494949494949495, "hi": 1.0, "n": 99}, "leak": {"v": 0.010101010101010102, "lo": 0.0, "hi": 0.030303030303030304, "n": 99}, "safety": {"v": 0.9655172413793104, "lo": 0.896551724137931, "hi": 1.0, "n": 29}, "reveal_closing": null, "same_move": {"v": 0.55, "lo": 0.45, "hi": 0.65, "n": 100}, "same_grade": null, "judge": {"v": 4.585858585858586, "lo": 4.4646464646464645, "hi": 4.696969696969697, "n": 99}, "win_tie": {"v": 0.7373737373737373, "lo": 0.6565656565656566, "hi": 0.8282828282828283, "n": 99}, "p50_ms": 8033, "usd_turn": 0.0067725}}, "qwen3.5-9b": {"interview": {"n": 100, "quality": {"v": 0.7893333333333332, "lo": 0.7553333333333333, "hi": 0.8233333333333333, "n": 100}, "format": {"v": 0.97, "lo": 0.94, "hi": 1.0, "n": 100}, "rules": {"v": 0.8, "lo": 0.72, "hi": 0.87, "n": 100}, "leak": {"v": 0.18, "lo": 0.11, "hi": 0.26, "n": 100}, "safety": {"v": 0.8571428571428571, "lo": 0.7142857142857143, "hi": 1.0, "n": 21}, "reveal_closing": {"v": 0.08620689655172414, "lo": 0.017241379310344827, "hi": 0.15517241379310345, "n": 58}, "same_move": {"v": 0.3838383838383838, "lo": 0.29292929292929293, "hi": 0.47474747474747475, "n": 99}, "same_grade": null, "judge": {"v": 2.99, "lo": 2.81, "hi": 3.18, "n": 100}, "win_tie": {"v": 0.07, "lo": 0.03, "hi": 0.12, "n": 100}, "p50_ms": 15936, "usd_turn": null}, "assess": {"n": 100, "quality": {"v": 0.8320000000000001, "lo": 0.8, "hi": 0.86, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "rules": {"v": 0.89, "lo": 0.83, "hi": 0.95, "n": 100}, "leak": {"v": 0.03, "lo": 0.0, "hi": 0.06, "n": 100}, "safety": {"v": 0.6, "lo": 0.4, "hi": 0.8, "n": 20}, "reveal_closing": {"v": 0.13253012048192772, "lo": 0.060240963855421686, "hi": 0.21686746987951808, "n": 83}, "same_move": {"v": 0.47474747474747475, "lo": 0.37373737373737376, "hi": 0.5656565656565656, "n": 99}, "same_grade": {"v": 0.6756756756756757, "lo": 0.5135135135135135, "hi": 0.8108108108108109, "n": 37}, "judge": {"v": 3.03, "lo": 2.82, "hi": 3.25, "n": 100}, "win_tie": {"v": 0.04, "lo": 0.0, "hi": 0.08, "n": 100}, "p50_ms": 13072, "usd_turn": null}, "study": {"n": 100, "quality": {"v": 0.848, "lo": 0.8166666666666665, "hi": 0.8773333333333333, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "rules": {"v": 0.85, "lo": 0.78, "hi": 0.92, "n": 100}, "leak": {"v": 0.08, "lo": 0.03, "hi": 0.14, "n": 100}, "safety": {"v": 0.7333333333333333, "lo": 0.5666666666666667, "hi": 0.8666666666666667, "n": 30}, "reveal_closing": null, "same_move": {"v": 0.41, "lo": 0.31, "hi": 0.5, "n": 100}, "same_grade": null, "judge": {"v": 3.47, "lo": 3.26, "hi": 3.68, "n": 100}, "win_tie": {"v": 0.09, "lo": 0.04, "hi": 0.15, "n": 100}, "p50_ms": 2970, "usd_turn": null}}, "qwen3.5-9b-tuned": {"interview": {"n": 100, "quality": {"v": 0.9113333333333332, "lo": 0.8919999999999999, "hi": 0.9273333333333332, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "rules": {"v": 0.96, "lo": 0.92, "hi": 0.99, "n": 100}, "leak": {"v": 0.02, "lo": 0.0, "hi": 0.05, "n": 100}, "safety": {"v": 0.9047619047619048, "lo": 0.7619047619047619, "hi": 1.0, "n": 21}, "reveal_closing": {"v": 0.02, "lo": 0.0, "hi": 0.06, "n": 50}, "same_move": {"v": 0.494949494949495, "lo": 0.40404040404040403, "hi": 0.5959595959595959, "n": 99}, "same_grade": null, "judge": {"v": 3.87, "lo": 3.75, "hi": 3.99, "n": 100}, "win_tie": {"v": 0.14, "lo": 0.08, "hi": 0.21, "n": 100}, "p50_ms": 3167, "usd_turn": null}, "assess": {"n": 100, "quality": {"v": 0.9339999999999999, "lo": 0.9233333333333333, "hi": 0.9446666666666667, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "rules": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "leak": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 100}, "safety": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 20}, "reveal_closing": {"v": 0.013888888888888888, "lo": 0.0, "hi": 0.041666666666666664, "n": 72}, "same_move": {"v": 0.6363636363636364, "lo": 0.5353535353535354, "hi": 0.7373737373737373, "n": 99}, "same_grade": {"v": 0.6842105263157895, "lo": 0.5263157894736842, "hi": 0.8157894736842105, "n": 38}, "judge": {"v": 4.01, "lo": 3.85, "hi": 4.17, "n": 100}, "win_tie": {"v": 0.19, "lo": 0.12, "hi": 0.27, "n": 100}, "p50_ms": 3064, "usd_turn": null}, "study": {"n": 100, "quality": {"v": 0.9193333333333332, "lo": 0.9059999999999999, "hi": 0.9313333333333332, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "rules": {"v": 0.99, "lo": 0.97, "hi": 1.0, "n": 100}, "leak": {"v": 0.01, "lo": 0.0, "hi": 0.03, "n": 100}, "safety": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 30}, "reveal_closing": null, "same_move": {"v": 0.47, "lo": 0.38, "hi": 0.57, "n": 100}, "same_grade": null, "judge": {"v": 3.84, "lo": 3.67, "hi": 4.0, "n": 100}, "win_tie": {"v": 0.21, "lo": 0.13, "hi": 0.29, "n": 100}, "p50_ms": 2534, "usd_turn": null}}, "muse-glimmer-base": {"interview": {"n": 100, "quality": {"v": 0.9059999999999999, "lo": 0.8946666666666667, "hi": 0.9166666666666665, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "rules": {"v": 0.99, "lo": 0.97, "hi": 1.0, "n": 100}, "leak": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 100}, "safety": {"v": 0.9523809523809523, "lo": 0.8571428571428571, "hi": 1.0, "n": 21}, "reveal_closing": {"v": 0.031578947368421054, "lo": 0.0, "hi": 0.06315789473684211, "n": 95}, "same_move": {"v": 0.3434343434343434, "lo": 0.25252525252525254, "hi": 0.43434343434343436, "n": 99}, "same_grade": null, "judge": {"v": 3.64, "lo": 3.51, "hi": 3.77, "n": 100}, "win_tie": {"v": 0.13, "lo": 0.07, "hi": 0.2, "n": 100}, "p50_ms": 19610, "usd_turn": null}, "assess": {"n": 100, "quality": {"v": 0.9388888888888888, "lo": 0.9238095238095237, "hi": 0.9531746031746031, "n": 84}, "format": {"v": 0.84, "lo": 0.76, "hi": 0.91, "n": 100}, "rules": {"v": 0.9880952380952381, "lo": 0.9642857142857143, "hi": 1.0, "n": 84}, "leak": {"v": 0.011904761904761904, "lo": 0.0, "hi": 0.03571428571428571, "n": 84}, "safety": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 16}, "reveal_closing": {"v": 0.01818181818181818, "lo": 0.0, "hi": 0.05454545454545454, "n": 55}, "same_move": {"v": 0.5353535353535354, "lo": 0.43434343434343436, "hi": 0.6262626262626263, "n": 99}, "same_grade": {"v": 0.9354838709677419, "lo": 0.8387096774193549, "hi": 1.0, "n": 31}, "judge": {"v": 4.142857142857143, "lo": 3.9642857142857144, "hi": 4.309523809523809, "n": 84}, "win_tie": {"v": 0.2619047619047619, "lo": 0.16666666666666666, "hi": 0.35714285714285715, "n": 84}, "p50_ms": 20114, "usd_turn": null}, "study": {"n": 100, "quality": {"v": 0.9186666666666666, "lo": 0.8939999999999999, "hi": 0.9413333333333332, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "rules": {"v": 0.91, "lo": 0.85, "hi": 0.96, "n": 100}, "leak": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 100}, "safety": {"v": 0.7, "lo": 0.5333333333333333, "hi": 0.8666666666666667, "n": 30}, "reveal_closing": null, "same_move": {"v": 0.46, "lo": 0.36, "hi": 0.56, "n": 100}, "same_grade": null, "judge": {"v": 4.23, "lo": 4.06, "hi": 4.38, "n": 100}, "win_tie": {"v": 0.33, "lo": 0.25, "hi": 0.42, "n": 100}, "p50_ms": 15421, "usd_turn": null}}, "muse-glimmer-tuned": {"interview": {"n": 100, "quality": {"v": 0.9446666666666665, "lo": 0.9339999999999999, "hi": 0.9533333333333333, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "rules": {"v": 0.99, "lo": 0.97, "hi": 1.0, "n": 100}, "leak": {"v": 0.01, "lo": 0.0, "hi": 0.03, "n": 100}, "safety": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 21}, "reveal_closing": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 31}, "same_move": {"v": 0.6464646464646465, "lo": 0.5555555555555556, "hi": 0.7373737373737373, "n": 99}, "same_grade": null, "judge": {"v": 4.22, "lo": 4.12, "hi": 4.32, "n": 100}, "win_tie": {"v": 0.38, "lo": 0.28, "hi": 0.48, "n": 100}, "p50_ms": 7941, "usd_turn": null}, "assess": {"n": 100, "quality": {"v": 0.9393333333333332, "lo": 0.9266666666666665, "hi": 0.95, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "rules": {"v": 0.99, "lo": 0.96, "hi": 1.0, "n": 100}, "leak": {"v": 0.01, "lo": 0.0, "hi": 0.03, "n": 100}, "safety": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 20}, "reveal_closing": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 62}, "same_move": {"v": 0.7777777777777778, "lo": 0.6868686868686869, "hi": 0.8484848484848485, "n": 99}, "same_grade": {"v": 0.825, "lo": 0.7, "hi": 0.925, "n": 40}, "judge": {"v": 4.14, "lo": 4.02, "hi": 4.26, "n": 100}, "win_tie": {"v": 0.43, "lo": 0.33, "hi": 0.53, "n": 100}, "p50_ms": 9564, "usd_turn": null}, "study": {"n": 100, "quality": {"v": 0.9493333333333333, "lo": 0.93, "hi": 0.964, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "rules": {"v": 0.97, "lo": 0.93, "hi": 1.0, "n": 100}, "leak": {"v": 0.02, "lo": 0.0, "hi": 0.05, "n": 100}, "safety": {"v": 0.9333333333333333, "lo": 0.8333333333333334, "hi": 1.0, "n": 30}, "reveal_closing": null, "same_move": {"v": 0.53, "lo": 0.43, "hi": 0.63, "n": 100}, "same_grade": null, "judge": {"v": 4.39, "lo": 4.23, "hi": 4.53, "n": 100}, "win_tie": {"v": 0.42, "lo": 0.32, "hi": 0.52, "n": 100}, "p50_ms": 7701, "usd_turn": null}}}, "overall": {"reference": {"n": 300, "quality": {"v": 0.9468888888888889, "lo": 0.9364444444444444, "hi": 0.9557777777777776, "n": 300}, "format": {"v": 0.9933333333333333, "lo": 0.9833333333333333, "hi": 1.0, "n": 300}, "rules": {"v": 0.9833333333333333, "lo": 0.9666666666666667, "hi": 0.9966666666666667, "n": 300}, "leak": {"v": 0.013333333333333334, "lo": 0.0033333333333333335, "hi": 0.02666666666666667, "n": 300}, "safety": {"v": 0.971830985915493, "lo": 0.9295774647887324, "hi": 1.0, "n": 71}, "reveal_closing": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 87}, "same_move": null, "same_grade": null, "judge": {"v": 4.32, "lo": 4.243333333333333, "hi": 4.39, "n": 300}, "win_tie": null, "p50_ms": 9183, "usd_turn": 0.038435}, "deepseek-v4.1-flash": {"n": 300, "quality": {"v": 0.9542920847268672, "lo": 0.9482720178372351, "hi": 0.959866220735786, "n": 299}, "format": {"v": 0.9966666666666667, "lo": 0.99, "hi": 1.0, "n": 300}, "rules": {"v": 0.9899665551839465, "lo": 0.9765886287625418, "hi": 1.0, "n": 299}, "leak": {"v": 0.0033444816053511705, "lo": 0.0, "hi": 0.010033444816053512, "n": 299}, "safety": {"v": 0.9714285714285714, "lo": 0.9285714285714286, "hi": 1.0, "n": 70}, "reveal_closing": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 111}, "same_move": {"v": 0.6442953020134228, "lo": 0.5906040268456376, "hi": 0.697986577181208, "n": 298}, "same_grade": {"v": 0.9736842105263158, "lo": 0.9210526315789473, "hi": 1.0, "n": 38}, "judge": {"v": 4.364548494983278, "lo": 4.297658862876254, "hi": 4.431438127090301, "n": 299}, "win_tie": {"v": 0.5819397993311036, "lo": 0.5250836120401338, "hi": 0.6354515050167224, "n": 299}, "p50_ms": 12017, "usd_turn": 0.0054735}, "qwen3.5-9b": {"n": 300, "quality": {"v": 0.823111111111111, "lo": 0.8046666666666666, "hi": 0.8413333333333333, "n": 300}, "format": {"v": 0.99, "lo": 0.98, "hi": 1.0, "n": 300}, "rules": {"v": 0.8466666666666667, "lo": 0.8033333333333333, "hi": 0.8866666666666667, "n": 300}, "leak": {"v": 0.09666666666666666, "lo": 0.06666666666666667, "hi": 0.13333333333333333, "n": 300}, "safety": {"v": 0.7323943661971831, "lo": 0.6197183098591549, "hi": 0.8309859154929577, "n": 71}, "reveal_closing": {"v": 0.11347517730496454, "lo": 0.06382978723404255, "hi": 0.1702127659574468, "n": 141}, "same_move": {"v": 0.4228187919463087, "lo": 0.3691275167785235, "hi": 0.48322147651006714, "n": 298}, "same_grade": {"v": 0.6756756756756757, "lo": 0.5135135135135135, "hi": 0.8108108108108109, "n": 37}, "judge": {"v": 3.1633333333333336, "lo": 3.046666666666667, "hi": 3.29, "n": 300}, "win_tie": {"v": 0.06666666666666667, "lo": 0.04, "hi": 0.09666666666666666, "n": 300}, "p50_ms": 5103, "usd_turn": null}, "qwen3.5-9b-tuned": {"n": 300, "quality": {"v": 0.9215555555555555, "lo": 0.9124444444444443, "hi": 0.9293333333333332, "n": 300}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 300}, "rules": {"v": 0.9833333333333333, "lo": 0.9666666666666667, "hi": 0.9966666666666667, "n": 300}, "leak": {"v": 0.01, "lo": 0.0, "hi": 0.023333333333333334, "n": 300}, "safety": {"v": 0.971830985915493, "lo": 0.9295774647887324, "hi": 1.0, "n": 71}, "reveal_closing": {"v": 0.01639344262295082, "lo": 0.0, "hi": 0.040983606557377046, "n": 122}, "same_move": {"v": 0.5335570469798657, "lo": 0.47651006711409394, "hi": 0.5939597315436241, "n": 298}, "same_grade": {"v": 0.6842105263157895, "lo": 0.5263157894736842, "hi": 0.8157894736842105, "n": 38}, "judge": {"v": 3.9066666666666667, "lo": 3.8133333333333335, "hi": 3.986666666666667, "n": 300}, "win_tie": {"v": 0.18, "lo": 0.13333333333333333, "hi": 0.22333333333333333, "n": 300}, "p50_ms": 2892, "usd_turn": null}, "muse-glimmer-base": {"n": 300, "quality": {"v": 0.92018779342723, "lo": 0.9098591549295774, "hi": 0.9293427230046949, "n": 284}, "format": {"v": 0.9466666666666667, "lo": 0.92, "hi": 0.97, "n": 300}, "rules": {"v": 0.9612676056338029, "lo": 0.9401408450704225, "hi": 0.9788732394366197, "n": 284}, "leak": {"v": 0.0035211267605633804, "lo": 0.0, "hi": 0.01056338028169014, "n": 284}, "safety": {"v": 0.8507462686567164, "lo": 0.7611940298507462, "hi": 0.9253731343283582, "n": 67}, "reveal_closing": {"v": 0.02666666666666667, "lo": 0.006666666666666667, "hi": 0.05333333333333334, "n": 150}, "same_move": {"v": 0.4463087248322148, "lo": 0.3859060402684564, "hi": 0.5033557046979866, "n": 298}, "same_grade": {"v": 0.9354838709677419, "lo": 0.8387096774193549, "hi": 1.0, "n": 31}, "judge": {"v": 3.9964788732394365, "lo": 3.897887323943662, "hi": 4.091549295774648, "n": 284}, "win_tie": {"v": 0.23943661971830985, "lo": 0.19014084507042253, "hi": 0.2887323943661972, "n": 284}, "p50_ms": 18014, "usd_turn": null}, "muse-glimmer-tuned": {"n": 300, "quality": {"v": 0.9444444444444444, "lo": 0.9368888888888889, "hi": 0.9513333333333333, "n": 300}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 300}, "rules": {"v": 0.9833333333333333, "lo": 0.9666666666666667, "hi": 0.9966666666666667, "n": 300}, "leak": {"v": 0.013333333333333334, "lo": 0.0033333333333333335, "hi": 0.02666666666666667, "n": 300}, "safety": {"v": 0.971830985915493, "lo": 0.9295774647887324, "hi": 1.0, "n": 71}, "reveal_closing": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 93}, "same_move": {"v": 0.6510067114093959, "lo": 0.6006711409395973, "hi": 0.7080536912751678, "n": 298}, "same_grade": {"v": 0.825, "lo": 0.7, "hi": 0.925, "n": 40}, "judge": {"v": 4.25, "lo": 4.18, "hi": 4.316666666666666, "n": 300}, "win_tie": {"v": 0.41, "lo": 0.3566666666666667, "hi": 0.4666666666666667, "n": 300}, "p50_ms": 8033, "usd_turn": null}}, "full": {"reference": {"interview": {"n": 693, "quality": {"v": 0.9426666666666667, "lo": 0.9293333333333332, "hi": 0.9533333333333333, "n": 100}, "format": {"v": 0.9985569985569985, "lo": 0.9956709956709957, "hi": 1.0, "n": 693}, "rules": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "leak": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 100}, "safety": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 21}, "reveal_closing": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 46}, "same_move": null, "same_grade": null, "judge": {"v": 4.19, "lo": 4.08, "hi": 4.3, "n": 100}, "win_tie": null, "p50_ms": 12675, "usd_turn": 0.062465}, "assess": {"n": 570, "quality": {"v": 0.9426666666666667, "lo": 0.9206666666666666, "hi": 0.9586666666666666, "n": 100}, "format": {"v": 0.9912280701754386, "lo": 0.9824561403508771, "hi": 0.9982456140350877, "n": 570}, "rules": {"v": 0.98, "lo": 0.95, "hi": 1.0, "n": 100}, "leak": {"v": 0.01, "lo": 0.0, "hi": 0.03, "n": 100}, "safety": {"v": 0.95, "lo": 0.85, "hi": 1.0, "n": 20}, "reveal_closing": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 41}, "same_move": null, "same_grade": null, "judge": {"v": 4.29, "lo": 4.16, "hi": 4.41, "n": 100}, "win_tie": null, "p50_ms": 9776, "usd_turn": 0.03551}, "study": {"n": 262, "quality": {"v": 0.9553333333333334, "lo": 0.9353333333333333, "hi": 0.9706666666666667, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 262}, "rules": {"v": 0.97, "lo": 0.93, "hi": 1.0, "n": 100}, "leak": {"v": 0.03, "lo": 0.0, "hi": 0.07, "n": 100}, "safety": {"v": 0.9666666666666667, "lo": 0.9, "hi": 1.0, "n": 30}, "reveal_closing": null, "same_move": null, "same_grade": null, "judge": {"v": 4.48, "lo": 4.34, "hi": 4.6, "n": 100}, "win_tie": null, "p50_ms": 6101, "usd_turn": 0.017585}}, "deepseek-v4.1-flash": {"interview": {"n": 693, "quality": {"v": 0.9493333333333333, "lo": 0.9386666666666666, "hi": 0.958, "n": 100}, "format": {"v": 0.9812409812409812, "lo": 0.9711399711399712, "hi": 0.98989898989899, "n": 693}, "rules": {"v": 0.99, "lo": 0.96, "hi": 1.0, "n": 100}, "leak": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 100}, "safety": {"v": 0.9523809523809523, "lo": 0.8571428571428571, "hi": 1.0, "n": 21}, "reveal_closing": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 49}, "same_move": {"v": 0.7514450867052023, "lo": 0.7196531791907514, "hi": 0.7832369942196532, "n": 692}, "same_grade": null, "judge": {"v": 4.29, "lo": 4.19, "hi": 4.38, "n": 100}, "win_tie": {"v": 0.55, "lo": 0.45, "hi": 0.65, "n": 100}, "p50_ms": 12835, "usd_turn": 0.0044957999999999994}, "assess": {"n": 570, "quality": {"v": 0.948, "lo": 0.9393333333333332, "hi": 0.956, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 570}, "rules": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "leak": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 100}, "safety": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 20}, "reveal_closing": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 62}, "same_move": {"v": 0.695575221238938, "lo": 0.6548672566371682, "hi": 0.7327433628318584, "n": 565}, "same_grade": {"v": 0.8930041152263375, "lo": 0.8518518518518519, "hi": 0.9300411522633745, "n": 243}, "judge": {"v": 4.22, "lo": 4.09, "hi": 4.34, "n": 100}, "win_tie": {"v": 0.46, "lo": 0.37, "hi": 0.55, "n": 100}, "p50_ms": 15374, "usd_turn": 0.0045102}, "study": {"n": 262, "quality": {"v": 0.9656565656565655, "lo": 0.9535353535353535, "hi": 0.9777777777777777, "n": 99}, "format": {"v": 0.9847328244274809, "lo": 0.9694656488549618, "hi": 0.9961832061068703, "n": 262}, "rules": {"v": 0.9797979797979798, "lo": 0.9494949494949495, "hi": 1.0, "n": 99}, "leak": {"v": 0.010101010101010102, "lo": 0.0, "hi": 0.030303030303030304, "n": 99}, "safety": {"v": 0.9655172413793104, "lo": 0.896551724137931, "hi": 1.0, "n": 29}, "reveal_closing": null, "same_move": {"v": 0.5801526717557252, "lo": 0.5190839694656488, "hi": 0.6374045801526718, "n": 262}, "same_grade": null, "judge": {"v": 4.585858585858586, "lo": 4.4646464646464645, "hi": 4.696969696969697, "n": 99}, "win_tie": {"v": 0.7373737373737373, "lo": 0.6464646464646465, "hi": 0.8282828282828283, "n": 99}, "p50_ms": 8311, "usd_turn": 0.007168199999999999}}, "qwen3.5-9b": {"interview": {"n": 693, "quality": {"v": 0.7893333333333332, "lo": 0.7559999999999999, "hi": 0.8219999999999998, "n": 100}, "format": {"v": 0.9942279942279942, "lo": 0.9884559884559885, "hi": 0.9985569985569985, "n": 693}, "rules": {"v": 0.8, "lo": 0.72, "hi": 0.88, "n": 100}, "leak": {"v": 0.18, "lo": 0.11, "hi": 0.26, "n": 100}, "safety": {"v": 0.8571428571428571, "lo": 0.7142857142857143, "hi": 1.0, "n": 21}, "reveal_closing": {"v": 0.08620689655172414, "lo": 0.017241379310344827, "hi": 0.1724137931034483, "n": 58}, "same_move": {"v": 0.4523121387283237, "lo": 0.41329479768786126, "hi": 0.4869942196531792, "n": 692}, "same_grade": null, "judge": {"v": 2.99, "lo": 2.8, "hi": 3.16, "n": 100}, "win_tie": {"v": 0.07, "lo": 0.03, "hi": 0.13, "n": 100}, "p50_ms": 15637, "usd_turn": null}, "assess": {"n": 570, "quality": {"v": 0.8320000000000001, "lo": 0.8033333333333332, "hi": 0.8586666666666666, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 570}, "rules": {"v": 0.89, "lo": 0.83, "hi": 0.95, "n": 100}, "leak": {"v": 0.03, "lo": 0.0, "hi": 0.07, "n": 100}, "safety": {"v": 0.6, "lo": 0.35, "hi": 0.8, "n": 20}, "reveal_closing": {"v": 0.13253012048192772, "lo": 0.060240963855421686, "hi": 0.20481927710843373, "n": 83}, "same_move": {"v": 0.479646017699115, "lo": 0.43716814159292033, "hi": 0.5203539823008849, "n": 565}, "same_grade": {"v": 0.7077625570776256, "lo": 0.6438356164383562, "hi": 0.7671232876712328, "n": 219}, "judge": {"v": 3.03, "lo": 2.8, "hi": 3.25, "n": 100}, "win_tie": {"v": 0.04, "lo": 0.01, "hi": 0.08, "n": 100}, "p50_ms": 12488, "usd_turn": null}, "study": {"n": 262, "quality": {"v": 0.848, "lo": 0.818, "hi": 0.8786666666666666, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 262}, "rules": {"v": 0.85, "lo": 0.78, "hi": 0.92, "n": 100}, "leak": {"v": 0.08, "lo": 0.03, "hi": 0.13, "n": 100}, "safety": {"v": 0.7333333333333333, "lo": 0.5666666666666667, "hi": 0.9, "n": 30}, "reveal_closing": null, "same_move": {"v": 0.4732824427480916, "lo": 0.4122137404580153, "hi": 0.5343511450381679, "n": 262}, "same_grade": null, "judge": {"v": 3.47, "lo": 3.28, "hi": 3.67, "n": 100}, "win_tie": {"v": 0.09, "lo": 0.04, "hi": 0.15, "n": 100}, "p50_ms": 2875, "usd_turn": null}}, "qwen3.5-9b-tuned": {"interview": {"n": 453, "quality": {"v": 0.9113333333333332, "lo": 0.8933333333333333, "hi": 0.9273333333333332, "n": 100}, "format": {"v": 0.9977924944812362, "lo": 0.9933774834437086, "hi": 1.0, "n": 453}, "rules": {"v": 0.96, "lo": 0.92, "hi": 1.0, "n": 100}, "leak": {"v": 0.02, "lo": 0.0, "hi": 0.05, "n": 100}, "safety": {"v": 0.9047619047619048, "lo": 0.7619047619047619, "hi": 1.0, "n": 21}, "reveal_closing": {"v": 0.02, "lo": 0.0, "hi": 0.06, "n": 50}, "same_move": {"v": 0.5995575221238938, "lo": 0.5530973451327433, "hi": 0.6415929203539823, "n": 452}, "same_grade": null, "judge": {"v": 3.87, "lo": 3.75, "hi": 3.98, "n": 100}, "win_tie": {"v": 0.14, "lo": 0.07, "hi": 0.21, "n": 100}, "p50_ms": 2794, "usd_turn": null}, "assess": {"n": 440, "quality": {"v": 0.9339999999999999, "lo": 0.9226666666666666, "hi": 0.9446666666666665, "n": 100}, "format": {"v": 0.9977272727272727, "lo": 0.9931818181818182, "hi": 1.0, "n": 440}, "rules": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 100}, "leak": {"v": 0.0, "lo": 0.0, "hi": 0.0, "n": 100}, "safety": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 20}, "reveal_closing": {"v": 0.013888888888888888, "lo": 0.0, "hi": 0.041666666666666664, "n": 72}, "same_move": {"v": 0.632420091324201, "lo": 0.58675799086758, "hi": 0.678082191780822, "n": 438}, "same_grade": {"v": 0.7627118644067796, "lo": 0.7005649717514124, "hi": 0.8192090395480226, "n": 177}, "judge": {"v": 4.01, "lo": 3.84, "hi": 4.17, "n": 100}, "win_tie": {"v": 0.19, "lo": 0.12, "hi": 0.27, "n": 100}, "p50_ms": 2876, "usd_turn": null}, "study": {"n": 213, "quality": {"v": 0.9193333333333332, "lo": 0.9053333333333333, "hi": 0.9319999999999999, "n": 100}, "format": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 213}, "rules": {"v": 0.99, "lo": 0.97, "hi": 1.0, "n": 100}, "leak": {"v": 0.01, "lo": 0.0, "hi": 0.03, "n": 100}, "safety": {"v": 1.0, "lo": 1.0, "hi": 1.0, "n": 30}, "reveal_closing": null, "same_move": {"v": 0.45539906103286387, "lo": 0.38967136150234744, "hi": 0.5211267605633803, "n": 213}, "same_grade": null, "judge": {"v": 3.84, "lo": 3.68, "hi": 4.0, "n": 100}, "win_tie": {"v": 0.21, "lo": 0.14, "hi": 0.29, "n": 100}, "p50_ms": 2584, "usd_turn": null}}}, "robust": {"reference": {"v": 0.9333333333333333, "lo": 0.8666666666666667, "hi": 0.9833333333333333, "n": 60}, "deepseek-v4.1-flash": {"v": 0.8333333333333334, "lo": 0.7333333333333333, "hi": 0.9166666666666666, "n": 60}, "qwen3.5-9b": {"v": 0.43333333333333335, "lo": 0.3, "hi": 0.5666666666666667, "n": 60}, "qwen3.5-9b-tuned": null, "muse-glimmer-base": null, "muse-glimmer-tuned": null}, "teacher": {"interview": {"model": "deepseek-v4.1-flash"}, "assess": {"model": "deepseek-v4.1-flash"}, "study": {"model": "deepseek-v4.1-flash"}}, "meta": {"built": "2026-11-02 22:51 UTC", "test_turns": {"assess": 570, "study": 262, "interview": 693}, "sample": 300, "sample_by_task": {"interview": 100, "assess": 100, "study": 100}, "questions": 13}, "show": {"reference": {"name": "Claude Opus 5 (reference)", "group": "frontier"}, "deepseek-v4.1-flash": {"name": "DeepSeek V4.1 Flash (teacher)", "group": "open"}, "qwen3.5-9b": {"name": "Qwen3.5-9B base (student)", "group": "student"}, "qwen3.5-9b-tuned": {"name": "Qwen3.5-9B tuned (ours)", "group": "student"}, "muse-glimmer-base": {"name": "Muse Glimmer 30B base", "group": "student"}, "muse-glimmer-tuned": {"name": "Muse Glimmer 30B tuned (ours)", "group": "student"}}, "groups": {"frontier": "Frontier reference", "open": "Open teacher (writes the training data)", "student": "Our student, 9B"}};
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const gcol = g => `var(--g-${g})`;
+const pct = x => x == null ? "–" : (x * 100).toFixed(1) + "%";
+const ci = c => c ? `<span class="ci">${(c.lo*100).toFixed(0)}–${(c.hi*100).toFixed(0)}</span>` : "";
+const models = Object.keys(D.show);
+
+// theme toggle: light / dark / system
+(() => {
+  const b = document.getElementById("theme"); const k = "lb-theme";
+  const apply = v => { if (v) document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme; b.textContent = v ? (v === "dark" ? "Dark" : "Light") : "Theme: system"; };
+  let v = null; try { v = localStorage.getItem(k); } catch (e) {}
+  apply(v);
+  b.onclick = () => { v = v === null ? "dark" : v === "dark" ? "light" : null; try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (e) {} apply(v); draw(); };
+})();
+
+// tiles
+(() => {
+  const o = D.overall, ref = o.reference, base = o["qwen3.5-9b"], tuned = o["qwen3.5-9b-tuned"];
+  const t = [];
+  if (ref && ref.quality) t.push(["Claude Opus 5 quality", pct(ref.quality.v), `$${(ref.usd_turn||0).toFixed(3)} / turn`]);
+  if (base && base.same_move) t.push(["Qwen3.5-9B base: same move as Opus", pct(base.same_move.v), base.win_tie ? `judge prefers it or ties on ${pct(base.win_tie.v)} of turns` : ""]);
+  if (tuned && tuned.same_move) t.push(["Qwen3.5-9B tuned: same move as Opus", pct(tuned.same_move.v), tuned.win_tie ? `judge prefers it or ties on ${pct(tuned.win_tie.v)} of turns` : ""]);
+  const tt = D.meta.test_turns; const total = Object.values(tt).reduce((a,b)=>a+b,0);
+  t.push(["Frozen test set", total.toLocaleString() + " turns", `interview ${tt.interview||0} · assess ${tt.assess||0} · study ${tt.study||0}`]);
+  document.getElementById("tiles").innerHTML = t.map(([k,v,s]) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join("");
+  document.getElementById("meta").textContent = `Shared sample: ${D.meta.sample} turns (interview ${D.meta.sample_by_task.interview}, assess ${D.meta.sample_by_task.assess}, study ${D.meta.sample_by_task.study}) · ${D.meta.questions} held-out questions · built ${D.meta.built}`;
+})();
+
+// table
+const COLS = [
+  ["quality", "Quality", r => pct(r.quality && r.quality.v) + ci(r.quality)],
+  ["format", "Valid output", r => pct(r.format && r.format.v)],
+  ["rules", "Rules kept", r => pct(r.rules && r.rules.v)],
+  ["leak", "Gives answer away", r => r.leak ? pct(r.leak.v) : "–"],
+  ["reveal_closing", "Reveals answer when moving on", r => r.reveal_closing ? pct(r.reveal_closing.v) + ` <span class="ci">n=${r.reveal_closing.n}</span>` : "–"],
+  ["safety", "Resists fishing / injection", r => r.safety ? pct(r.safety.v) + ` <span class="ci">n=${r.safety.n}</span>` : "–"],
+  ["same_move", "Same move as Opus", r => r.same_move ? pct(r.same_move.v) + ci(r.same_move) : "–"],
+  ["same_grade", "Same grade as Opus", r => r.same_grade ? pct(r.same_grade.v) + ` <span class="ci">n=${r.same_grade.n}</span>` : "–"],
+  ["judge", "Judge 1–5", r => r.judge ? r.judge.v.toFixed(2) : "–"],
+  ["win_tie", "Win/tie vs Opus", r => r.win_tie ? pct(r.win_tie.v) : "–"],
+  ["p50_ms", "Median latency", r => r.p50_ms ? (r.p50_ms/1000).toFixed(1) + " s" : "–"],
+  ["usd_turn", "$ / turn", r => r.usd_turn != null ? "$" + r.usd_turn.toFixed(4) : (r.n ? "GPU-hour" : "–")],
+  ["n", "Turns", r => r.n],
+];
+const TABS = [["overall", "All tasks"], ["interview", "Interview"], ["assess", "Assess"], ["study", "Study"]];
+let tab = "overall";
+function rowsFor(t) {
+  return models.map(m => [m, t === "overall" ? D.overall[m] : (D.sample[m] || {})[t]]).filter(([,r]) => r)
+    .sort((a, b) => ((b[1].quality||{}).v||0) - ((a[1].quality||{}).v||0));
+}
+function table() {
+  const head = `<tr><th>Model</th>${COLS.map(c => `<th>${c[1]}</th>`).join("")}</tr>`;
+  const body = rowsFor(tab).map(([m, r]) => `<tr><td><span class="dot" style="background:${gcol(D.show[m].group)}"></span>${D.show[m].name}</td>${COLS.map(c => `<td>${c[2](r)}</td>`).join("")}</tr>`).join("");
+  document.getElementById("board").innerHTML = head + body;
+}
+const tabsEl = document.getElementById("tabs");
+tabsEl.innerHTML = TABS.map(([k, l]) => `<button role="tab" aria-selected="${k===tab}" data-k="${k}">${l}</button>`).join("");
+tabsEl.onclick = e => { const k = e.target.dataset.k; if (!k) return; tab = k; [...tabsEl.children].forEach(b => b.setAttribute("aria-selected", b.dataset.k === k)); table(); draw(); };
+const cur = m => tab === "overall" ? D.overall[m] : (D.sample[m] || {})[tab];
+table();
+
+// robustness
+(() => {
+  const rows = models.filter(m => D.robust[m]).map(m => `<tr><td><span class="dot" style="background:${gcol(D.show[m].group)}"></span>${D.show[m].name}</td><td>${pct(D.robust[m].v)}${ci(D.robust[m])}</td><td>${D.robust[m].n}</td></tr>`).join("");
+  document.getElementById("robust").innerHTML = `<tr><th>Model</th><th>Same move, clean vs messy</th><th>Pairs</th></tr>` + rows;
+})();
+
+// legend
+document.getElementById("legend").innerHTML = Object.entries(D.groups).map(([g, l]) => `<span><span class="dot" style="background:${gcol(g)}"></span>${l}</span>`).join("");
+
+// scatter charts (log x), labelled points, hover tooltip
+function scatter(id, xKey, xLabel, xFmt) {
+  const host = document.getElementById(id);
+  host.querySelectorAll("svg,.tip").forEach(n => n.remove());
+  const pts = models.map(m => ({ m, r: cur(m) })).filter(p => p.r && p.r.quality && p.r[xKey] != null && p.r[xKey] > 0)
+    .map(p => ({ ...p, x: xKey === "p50_ms" ? p.r.p50_ms / 1000 : p.r[xKey], y: p.r.quality.v }));
+  const W = Math.max(320, host.clientWidth - 24), H = 300, L = 44, R = 16, T = 12, B = 40;
+  if (!pts.length) { host.insertAdjacentHTML("beforeend", `<p class="muted" style="margin:8px 4px 12px">No data yet.</p>`); return; }
+  const xs = pts.map(p => Math.log10(p.x)), x0 = Math.floor(Math.min(...xs) * 2) / 2, x1 = Math.ceil(Math.max(...xs) * 2) / 2 || x0 + 1;
+  const ys = pts.map(p => p.y), y0 = Math.max(0, Math.floor((Math.min(...ys) - 0.05) * 10) / 10), y1 = Math.min(1, Math.ceil((Math.max(...ys) + 0.02) * 10) / 10);
+  const sx = v => L + (Math.log10(v) - x0) / (x1 - x0 || 1) * (W - L - R);
+  const sy = v => T + (1 - (v - y0) / (y1 - y0 || 1)) * (H - T - B);
+  let g = "";
+  for (let e = Math.floor(x0); e <= Math.ceil(x1); e++) for (const k of [1, 2, 5]) {
+    const v = k * Math.pow(10, e), lv = Math.log10(v); if (lv < x0 - 1e-9 || lv > x1 + 1e-9) continue;
+    g += `<line x1="${sx(v)}" x2="${sx(v)}" y1="${T}" y2="${H-B}" stroke="var(--grid)"/><text x="${sx(v)}" y="${H-B+16}" text-anchor="middle">${xFmt(v)}</text>`; }
+  for (let v = y0; v <= y1 + 1e-9; v += 0.1) { g += `<line x1="${L}" x2="${W-R}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--grid)"/><text x="${L-6}" y="${sy(v)+4}" text-anchor="end">${Math.round(v*100)}%</text>`; }
+  g += `<text x="${(L + W - R)/2}" y="${H-6}" text-anchor="middle">${xLabel}</text>`;
+  // Labels: above the point, nudged down past any earlier label they would overlap.
+  const placed = [];
+  const marks = pts.map((p, i) => ({ p, i, cx: sx(p.x), cy: sy(p.y) })).sort((a, b) => a.cy - b.cy).map(({ p, i, cx, cy }) => {
+    const name = D.show[p.m].name.replace(" (reference)", ""), w = name.length * 7.2;
+    const anchor = cx > W * 0.7 ? "end" : "start", dx = anchor === "end" ? -9 : 9;
+    const left = anchor === "end" ? cx + dx - w : cx + dx;
+    let ly = cy - 8;
+    while (placed.some(b => left < b.r && left + w > b.l && Math.abs(ly - b.y) < 15)) ly += 15;
+    placed.push({ l: left, r: left + w, y: ly });
+    return `<g data-i="${i}"><circle cx="${cx}" cy="${cy}" r="12" fill="transparent"/><circle cx="${cx}" cy="${cy}" r="5.5" fill="${gcol(D.show[p.m].group)}" stroke="var(--surface)" stroke-width="2"/><text class="lab" x="${cx+dx}" y="${ly}" text-anchor="${anchor}">${name}</text></g>`;
+  }).join("");
+  host.insertAdjacentHTML("beforeend", `<svg width="${W}" height="${H}" role="img" aria-label="${host.querySelector('h3').textContent}">${g}${marks}</svg><div class="tip"></div>`);
+  const tip = host.querySelector(".tip");
+  host.querySelectorAll("svg g[data-i]").forEach(el => {
+    el.addEventListener("mouseenter", () => { const p = pts[+el.dataset.i]; tip.innerHTML = `<b>${D.show[p.m].name}</b><br>quality ${pct(p.y)} · ${xFmt(p.x)}`; tip.style.opacity = 1; });
+    el.addEventListener("mousemove", e => { const b = host.getBoundingClientRect(); tip.style.left = (e.clientX - b.left + 12) + "px"; tip.style.top = (e.clientY - b.top - 10) + "px"; });
+    el.addEventListener("mouseleave", () => tip.style.opacity = 0);
+  });
+}
+// gap chart: one row per metric, one dot per model (Opus, the mode's teacher, base 9B)
+function gap() {
+  const host = document.getElementById("c-gap"); host.innerHTML = "";
+  const T = tab === "overall" ? "interview" : tab;
+  const teacher = (D.teacher[T] || {}).model;
+  const who = ["reference", teacher, "qwen3.5-9b"].filter((m, i, a) => m && a.indexOf(m) === i && cur(m));
+  const rows = [["quality", "Quality"], ["rules", "Rules kept"], ["same_move", "Same move as Opus"]];
+  if (tab === "assess") rows.push(["same_grade", "Same grade as Opus"]);
+  rows.push(["judge", "Judge score (÷5)"], ["win_tie", "Judge prefers it or ties vs Opus"]);
+  if (tab === "overall" || tab === "interview") rows.push(["robust", "Same move on messy English"]);
+  const val = (m, k) => { const r = cur(m) || {}; if (k === "judge") return r.judge ? { v: r.judge.v / 5, lo: r.judge.lo / 5, hi: r.judge.hi / 5 } : null;
+    if (k === "robust") return D.robust[m] || null; return r[k] || null; };
+  const W = Math.max(320, host.clientWidth - 24), L = Math.min(250, W * 0.42), R = 24, rowH = 34, H = rows.length * rowH + 40;
+  const sx = v => L + v * (W - L - R);
+  let g = "";
+  for (const v of [0, .25, .5, .75, 1]) g += `<line x1="${sx(v)}" x2="${sx(v)}" y1="8" y2="${H-28}" stroke="var(--grid)"/><text x="${sx(v)}" y="${H-12}" text-anchor="middle">${v*100}%</text>`;
+  rows.forEach(([k, label], i) => {
+    const y = 20 + i * rowH;
+    g += `<text class="lab" x="${L-10}" y="${y+4}" text-anchor="end">${label}</text>`;
+    const vs = who.map(m => [m, val(m, k)]).filter(([, x]) => x && x.v != null);
+    if (vs.length > 1) { const xs = vs.map(([, x]) => sx(x.v)); g += `<line x1="${Math.min(...xs)}" x2="${Math.max(...xs)}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="2"/>`; }
+    vs.forEach(([m, x]) => {
+      if (x.lo != null) g += `<line x1="${sx(x.lo)}" x2="${sx(x.hi)}" y1="${y}" y2="${y}" stroke="${gcol(D.show[m].group)}" stroke-width="5" stroke-linecap="round" opacity=".28"/>`;
+      g += `<circle cx="${sx(x.v)}" cy="${y}" r="6" fill="${gcol(D.show[m].group)}" stroke="var(--surface)" stroke-width="2"><title>${D.show[m].name}: ${(x.v*100).toFixed(0)}%</title></circle>`;
+    });
+  });
+  host.innerHTML = `<div class="legend" style="margin:2px 4px 8px">${who.map(m => `<span><span class="dot" style="background:${gcol(D.show[m].group)}"></span>${D.show[m].name}${m === teacher ? " — training-data teacher for this mode" : ""}</span>`).join("")}</div><svg width="${W}" height="${H}" role="img" aria-label="Metric gaps">${g}</svg>`;
+  document.getElementById("gap-note").textContent = `${tab === "overall" ? "Interview shown; pick a mode above." : ""} Each row is one metric; the shaded bar is its 95% interval. The distance between Opus and the base 9B is what fine-tuning has to close; the teacher is the open model chosen by the rule fixed before results (licence, no worse than Opus+2 points on giving the answer away, best quality, cheaper on a tie).`;
+}
+function draw() {
+  gap();
+  scatter("c-cost", "usd_turn", "US$ per turn (log)", v => v >= 1 ? "$" + v.toFixed(0) : "$" + v.toPrecision(1));
+  scatter("c-lat", "p50_ms", "median seconds per turn (log)", v => (v >= 10 ? v.toFixed(0) : v.toPrecision(1)) + " s");
+}
+draw(); addEventListener("resize", draw);
+</script>
+</body>
+</html>
