@@ -173,6 +173,58 @@ async def judge(split: str, models: List[str], sample: int, *, concurrency: int,
     print("judge:", dict(done), "openai spend", round(store.spent(conn, "openai"), 2))
 
 
+def attempt_turn(rec: Dict[str, Any]) -> bool:
+    """A turn where the candidate tried manipulation or asked for the answer: the
+    simulator's own flag, its persona, or the Study message kind."""
+    from distill.score import is_injection_attempt
+
+    cand = rec.get("candidate") or {}
+    if cand.get("injection_attempt"):
+        return True
+    if cand.get("persona") in ("injection", "asks_answer") or cand.get("kind") in ("injection", "asks_answer"):
+        return True
+    return is_injection_attempt(rec.get("message") or "")
+
+
+async def safety(split: str, models: List[str], sample: int, *, concurrency: int, cap: float) -> None:
+    """The safety judge on the sample's manipulation and answer-fishing turns, for
+    the reference and every model that answered them."""
+    from distill import judge as J
+
+    conn = store.connect()
+    picked = [r for r in stratified(list(store.records(conn, split=split)), sample) if attempt_turn(r)]
+    runs = _runs(conn, split)
+    sem = asyncio.Semaphore(concurrency)
+    done = Counter()
+
+    async def one(rec, model, out):
+        async with sem:
+            if conn.execute("select 1 from scores where record_id=? and model=? and kind='safety'",
+                            (rec["id"], model)).fetchone() or store.spent(conn, "openai") >= cap:
+                return
+            try:
+                res = await J.safety(rec, out)
+                store.put_score(conn, rec["id"], model, "safety", res)
+                u = res.get("usage") or {}
+                store.log_spend(conn, "openai", "gpt-5.4", "judge:safety", u.get("in", 0), u.get("out", 0),
+                                cost("gpt-5.4", u.get("in", 0), u.get("out", 0)))
+                done["ok"] += 1
+            except Exception:
+                done["error"] += 1
+                traceback.print_exc(limit=2)
+
+    jobs = []
+    for rec in picked:
+        jobs.append(one(rec, REFERENCE, rec["interviewer"]))
+        for m in models:
+            out = runs.get(m, {}).get(rec["id"])
+            if out and out.get("move"):
+                jobs.append(one(rec, m, out))
+    print(f"{len(picked)} attempt turns in the sample, {len(jobs)} judge calls")
+    await asyncio.gather(*jobs)
+    print("safety:", dict(done), "openai spend", round(store.spent(conn, "openai"), 2))
+
+
 def board(split: str) -> Dict[str, Any]:
     conn = store.connect()
     recs = {r["id"]: r for r in store.records(conn, split=split)}
@@ -236,7 +288,7 @@ def _print(out: Dict[str, Any]) -> None:
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("what", choices=["run", "score", "judge", "board"])
+    ap.add_argument("what", choices=["run", "score", "judge", "safety", "board"])
     ap.add_argument("--split", default="test")
     ap.add_argument("--models", nargs="*", default=[])
     ap.add_argument("--concurrency", type=int, default=8)
@@ -258,6 +310,8 @@ def main(argv=None):
     elif a.what == "judge":
         asyncio.run(judge(a.split, a.models, a.sample, concurrency=a.concurrency,
                           cap=a.cap_openai, pairwise=a.pairwise, seed=a.seed))
+    elif a.what == "safety":
+        asyncio.run(safety(a.split, a.models, a.sample, concurrency=a.concurrency, cap=a.cap_openai))
     else:
         board(a.split)
 
