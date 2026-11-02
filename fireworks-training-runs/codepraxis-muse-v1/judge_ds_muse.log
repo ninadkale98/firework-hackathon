@@ -1,0 +1,5 @@
+300 turns, 300 (turn, model) jobs, judge accounts/fireworks/models/deepseek-v4p1-flash
+  100/300 errors=0
+  200/300 errors=0
+  300/300 errors=0
+done: {'ok': 300} deepseek judge spend $ 7.04

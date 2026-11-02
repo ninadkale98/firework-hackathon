@@ -1,0 +1,498 @@
+300 turns, 284 (turn, model) jobs, judge accounts/fireworks/models/deepseek-v4p1-flash
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 71, in one
+    res = await J.safety_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 809, in safety_task
+    out = await _safety_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 71, in one
+    res = await J.safety_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 809, in safety_task
+    out = await _safety_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 65, in one
+    res = await J.criteria_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 791, in criteria_task
+    out = await _criteria_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 65, in one
+    res = await J.criteria_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 791, in criteria_task
+    out = await _criteria_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 71, in one
+    res = await J.safety_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 809, in safety_task
+    out = await _safety_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 65, in one
+    res = await J.criteria_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 791, in criteria_task
+    out = await _criteria_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 71, in one
+    res = await J.safety_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 809, in safety_task
+    out = await _safety_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 71, in one
+    res = await J.safety_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 809, in safety_task
+    out = await _safety_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 65, in one
+    res = await J.criteria_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 791, in criteria_task
+    out = await _criteria_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 65, in one
+    res = await J.criteria_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 791, in criteria_task
+    out = await _criteria_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 65, in one
+    res = await J.criteria_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 791, in criteria_task
+    out = await _criteria_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 65, in one
+    res = await J.criteria_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 791, in criteria_task
+    out = await _criteria_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 71, in one
+    res = await J.safety_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 809, in safety_task
+    out = await _safety_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 65, in one
+    res = await J.criteria_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 791, in criteria_task
+    out = await _criteria_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+  100/284 errors=34
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 71, in one
+    res = await J.safety_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 809, in safety_task
+    out = await _safety_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 65, in one
+    res = await J.criteria_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 791, in criteria_task
+    out = await _criteria_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 65, in one
+    res = await J.criteria_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 791, in criteria_task
+    out = await _criteria_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 65, in one
+    res = await J.criteria_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 791, in criteria_task
+    out = await _criteria_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 722, in pairwise_task
+    return await pairwise(record, out_a, out_b, model=model, api=api)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 71, in one
+    res = await J.safety_task(rec, out, model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 809, in safety_task
+    out = await _safety_task_raw(record, output, **kw)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.
+Traceback (most recent call last):
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/scripts/judge_ds.py", line 68, in one
+    res = await J.pairwise_task(rec, out, rec["interviewer"], model=jm, api=api)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/Desktop/hackathon/firework-hackathon/distill/judge.py", line 729, in pairwise_task
+    res = await _call(system, _user_prompt_task(record, labels), "Pairwise", PAIRWISE_SCHEMA,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openai.RateLimitError: Error code: 429 - Request failed with HTTP status 429.

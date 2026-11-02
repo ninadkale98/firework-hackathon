@@ -60,6 +60,19 @@ MODELS: Dict[str, ModelSpec] = {spec.name: spec for spec in (
               os.getenv("DISTILL_STUDENT_DEPLOYMENT", "accounts/fireworks/models/qwen3p5-9b"),
               None, None, "on-demand H100 ~$8/h"),
     ModelSpec("qwen3-8b-local", "ollama", "qwen3-8b-32k", None, (0.0, 0.0)),
+    # The tuned student: Muse Glimmer 30B + LoRA (serverless SFT on data/export/train.jsonl,
+    # fireworks-training-runs/codepraxis-muse-v1). On-demand deployment, 1x H200 BF16.
+    ModelSpec("muse-glimmer-tuned", "fireworks",
+              os.getenv("DISTILL_TUNED_DEPLOYMENT",
+                        "accounts/vishakha-d933-0nmp64/models/muse-starter-sl-codepraxis-muse-v1"
+                        "#accounts/vishakha-d933-0nmp64/deployments/eqb76xt9"),
+              None, None, "on-demand H200 $8/h"),
+    # Base Muse Glimmer 30B, the tuned model's starting point (no serverless inference).
+    ModelSpec("muse-glimmer-base", "fireworks",
+              os.getenv("DISTILL_MUSE_BASE_DEPLOYMENT",
+                        "accounts/fireworks/models/muse-glimmer-30b"
+                        "#accounts/vishakha-d933-0nmp64/deployments/muse-glimmer-base-eval"),
+              None, None, "on-demand H200 $8/h"),
 )}
 
 

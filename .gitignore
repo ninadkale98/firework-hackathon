@@ -8,3 +8,6 @@ __pycache__/
 .pytest_cache/
 *.pyc
 .DS_Store
+# Training-run copies of the (private-at-the-time) training data; keep only logs and results
+fireworks-training-runs/**/train.jsonl
+fireworks-training-runs/**/holdout.jsonl
