@@ -1,0 +1,40 @@
+{
+  "steps": 521,
+  "base": {
+    "label": "base",
+    "exact_match": 0.0,
+    "unterminated": 7,
+    "prompt_tokens": 281222,
+    "sampled_tokens": 59435,
+    "field_accuracy": {
+      "move_object": 0.0
+    }
+  },
+  "tuned": {
+    "label": "tuned",
+    "exact_match": 0.0,
+    "unterminated": 0,
+    "prompt_tokens": 281222,
+    "sampled_tokens": 12742,
+    "field_accuracy": {
+      "move_object": 0.0
+    }
+  },
+  "promoted_model": "accounts/vishakha-d933-0nmp64/models/muse-starter-sl-codepraxis-muse-v1",
+  "exact_match_delta": 0.0,
+  "paired": {
+    "only_tuned_correct": 0,
+    "only_base_correct": 0,
+    "p_value": 1.0
+  },
+  "session": "ts-04c8fa923655443fb647f006662615e7",
+  "log": "/Users/koro/Desktop/hackathon/firework-hackathon/fireworks-training-runs/codepraxis-muse-v1/full",
+  "cost": {
+    "training": "$0 (promotional)",
+    "evaluation_sampling": {
+      "prompt_tokens": 562444,
+      "sampled_tokens": 72177,
+      "note": "billed separately from training at published per-token rates"
+    }
+  }
+}

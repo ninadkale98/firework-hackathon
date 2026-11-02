@@ -1,0 +1,40 @@
+{
+  "steps": 50,
+  "base": {
+    "label": "base",
+    "exact_match": 0.0,
+    "unterminated": 6,
+    "prompt_tokens": 137254,
+    "sampled_tokens": 30989,
+    "field_accuracy": {
+      "move_object": 0.0
+    }
+  },
+  "tuned": {
+    "label": "tuned",
+    "exact_match": 0.0,
+    "unterminated": 0,
+    "prompt_tokens": 137254,
+    "sampled_tokens": 7837,
+    "field_accuracy": {
+      "move_object": 0.0
+    }
+  },
+  "promoted_model": null,
+  "exact_match_delta": 0.0,
+  "paired": {
+    "only_tuned_correct": 0,
+    "only_base_correct": 0,
+    "p_value": 1.0
+  },
+  "session": "ts-b4c8d59879bc4b8bb7abf4c1a3f91f58",
+  "log": "/Users/koro/Desktop/hackathon/firework-hackathon/fireworks-training-runs/codepraxis-muse-v1/pilot",
+  "cost": {
+    "training": "$0 (promotional)",
+    "evaluation_sampling": {
+      "prompt_tokens": 274508,
+      "sampled_tokens": 38826,
+      "note": "billed separately from training at published per-token rates"
+    }
+  }
+}

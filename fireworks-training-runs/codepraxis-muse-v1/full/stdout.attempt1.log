@@ -1,0 +1,42 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] You are using a model of type `muse_glimmer` to instantiate a model of type ``. This may be expected if you are loading a checkpoint that shares a subset of the architecture (e.g., loading a `sam2_video` checkpoint into `Sam2Model`), but is otherwise not supported and can yield errors. Please verify that the checkpoint is compatible with the model you are instantiating.
+rendered 8321/8321 train rows; holdout 40 rows; example prompt tokens=17173
+Serverless session closed; no deployment was created. Its training slot frees when the session expires, so a new run started right away may wait or get a 429.
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/koro/.claude/plugins/marketplaces/fw-ai-cookbook/training/examples/sft/muse_glimmer_starter.py", line 833, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/koro/.claude/plugins/marketplaces/fw-ai-cookbook/training/examples/sft/muse_glimmer_starter.py", line 829, in main
+    return cmd_launch_serverless(args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/koro/.claude/plugins/marketplaces/fw-ai-cookbook/training/examples/sft/muse_glimmer_starter.py", line 605, in cmd_launch_serverless
+    training_client = service.create_lora_training_client(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-koro-Desktop-hackathon-firework-hackathon-data/d195c665-f9d0-43a5-9b07-b2c212a87fa0/scratchpad/venv/lib/python3.12/site-packages/fireworks/training/sdk/client.py", line 4194, in create_lora_training_client
+    return self.create_training_client(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-koro-Desktop-hackathon-firework-hackathon-data/d195c665-f9d0-43a5-9b07-b2c212a87fa0/scratchpad/venv/lib/python3.12/site-packages/fireworks/training/sdk/client.py", line 4148, in create_training_client
+    response = self.holder.run_coroutine_threadsafe(_create()).result()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-koro-Desktop-hackathon-firework-hackathon-data/d195c665-f9d0-43a5-9b07-b2c212a87fa0/scratchpad/venv/lib/python3.12/site-packages/fireworks/training/sdk/_core/lib/public_interfaces/api_future.py", line 127, in result
+    return self._future.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py", line 456, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/private/tmp/claude-501/-Users-koro-Desktop-hackathon-firework-hackathon-data/d195c665-f9d0-43a5-9b07-b2c212a87fa0/scratchpad/venv/lib/python3.12/site-packages/fireworks/training/sdk/client.py", line 4129, in _create
+    future = await client.models.create(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-koro-Desktop-hackathon-firework-hackathon-data/d195c665-f9d0-43a5-9b07-b2c212a87fa0/scratchpad/venv/lib/python3.12/site-packages/fireworks/training/sdk/_core/resources/models.py", line 61, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-koro-Desktop-hackathon-firework-hackathon-data/d195c665-f9d0-43a5-9b07-b2c212a87fa0/scratchpad/venv/lib/python3.12/site-packages/fireworks/training/sdk/_core/_base_client.py", line 1258, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-koro-Desktop-hackathon-firework-hackathon-data/d195c665-f9d0-43a5-9b07-b2c212a87fa0/scratchpad/venv/lib/python3.12/site-packages/fireworks/training/sdk/_core/_base_client.py", line 1063, in request
+    raise self._make_status_error_from_response(err.response) from None
+fireworks.training.sdk._core._exceptions.RateLimitError: Error code: 429 - {'error': {'message': 'create_model: maximum concurrent serverless training runs for base model accounts/fireworks/models/muse-glimmer-30b exceeded: in use 1, limit 1', 'param': None, 'code': 'RATE_LIMIT_EXCEEDED', 'type': 'error'}, 'request_id': '3b263d33-5929-4719-83da-c0ba92fa09c4'}

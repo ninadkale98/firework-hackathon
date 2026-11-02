@@ -9,3 +9,6 @@ __pycache__/
 *.pyc
 .DS_Store
 .venv-fw/
+# Training-run copies of the training data; keep only logs and results
+fireworks-training-runs/**/train.jsonl
+fireworks-training-runs/**/holdout.jsonl
