@@ -2,7 +2,7 @@
 
 A second student, trained alongside the Qwen3.5-9B run: **Muse Glimmer 30B + LoRA**, fine-tuned on the same training export and evaluated on the same frozen test set with the leaderboard's metrics. This file records what was done, how, the results, and how to reproduce or extend it.
 
-**Status: final.** Training done, model saved, evaluation complete on the 300-turn shared sample: every valid answer of every model judged (base Muse's 16 invalid answers have no move and are not judged, as on the leaderboard). A DPO round on top of the tuned model is planned (~250–300 pairs, ~$37 budget) and will be added here.
+**Status: final.** Training done, model saved, evaluation complete on the 300-turn shared sample: every valid answer of every model judged (base Muse's 16 invalid answers have no move and are not judged, as on the leaderboard). DPO and a v2 SFT were investigated but not run; see [Open items](#7-open-items).
 
 ## 1. Results in one table
 
@@ -152,6 +152,8 @@ To put Muse on the public page, add `"muse-glimmer-tuned"` (and `"muse-glimmer-b
 ## 7. Open items
 - **Qwen3.5-9B tuned** (the other student, in progress on the other account): evaluate with the same `judge_ds.py` so both students share a judge.
 - **Next training round for Muse**: the loss plateau after step 250 points to LR decay or a second epoch (free, ~1.5 h, warm-start from the saved adapter with the cookbook's `sft_loop` `warm_start_from_adapter`). Target the Assess grading regression with more stage-closing rows.
+- **DPO on top of the tuned model is blocked on serverless.** The cookbook's serverless `dpo_loop` refuses warm starts (`serverless DPO does not support warm starts`), and loading the promoted adapter into a serverless session with `load_adapter` failed 4/4 times (`Adapter could not be loaded from durable storage`). Working route: SFT and DPO in **one** session (SFT free ~1.5 h, then DPO on the same weights). Pairs are ready: `data/export/dpo.jsonl` in the data repo (1,223 pairs, rejected = base Qwen3.5-9B); the 300 shortest are 1.95M tokens ≈ $15 of DPO (≈ $11.40 train + $3.81 reference prefill).
+- **v2 SFT, prepared but not run** (no time before the presentation): [scripts/muse_sft_v2.py](scripts/muse_sft_v2.py) adds 20-step warmup + linear LR decay to 0; data = train + val with the 1,192 Assess grading turns repeated (10,235 rows, ~638 steps, ~1.7 h, free). See [fireworks-training-runs/codepraxis-muse-v2/run.md](fireworks-training-runs/codepraxis-muse-v2/run.md).
 - **DPO is not free** for Muse (~$5.86/1M train + $1.96/1M reference prefill at serverless rates; ~$40 for 300 pairs of this length). Worth it only for a specific behaviour the judge flags.
 - The 40-row held-out check inside training was a random split of `train.jsonl` (sessions can straddle it); the 300-turn test-set numbers above are the ones to quote.
 
