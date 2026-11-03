@@ -111,6 +111,7 @@ html.js .tab { display: none; } html.js .tab.on { display: block; }
   <a href="#training" data-tab="training">4 · Training</a>
   <a href="#evaluation" data-tab="evaluation">5 · Evaluation</a>
   <span class="sp"></span>
+  <a class="ext" href="#results-video">Demo video</a>
   <a class="ext" href="leaderboard.html">Leaderboard</a>
   <a class="ext" href="https://github.com/ninadkale98/firework-hackathon">Code</a>
   <a class="ext" href="https://github.com/ninadkale98/firework-hackathon-data">Data</a>
@@ -119,6 +120,11 @@ html.js .tab { display: none; } html.js .tab.on { display: block; }
 <section class="tab" id="results">
 <h2><span class="n">0</span>Results</h2>
 <p>We fine-tuned two open models on our own interview data and scored them on 300 frozen test turns from questions they never saw, against Claude Opus 5. One judge (DeepSeek V4.1 Flash) scored every model.</p>
+
+<figure id="results-video" style="margin:18px 0 6px">
+<video controls preload="metadata" playsinline style="width:100%;border-radius:12px;border:1px solid var(--border);background:#000" src="demo/codepraxis-demo.mp4"></video>
+<figcaption>Demo video, 2 minutes: the platform, how the agents work, the data, the results and the Model Arena (a replay and a live prompt-injection attempt). On GitHub: <a href="https://github.com/ninadkale98/firework-hackathon/blob/main/demo/codepraxis-demo.mp4">github.com/ninadkale98/firework-hackathon/blob/main/demo/codepraxis-demo.mp4</a></figcaption>
+</figure>
 
 <div class="stats">
   <div class="stat"><div class="v">4.25 <span class="of">vs 4.32</span></div><div class="l">Muse Glimmer 30B tuned: judge score against Opus's (1–5); Opus's interval is 4.25–4.39</div></div>
