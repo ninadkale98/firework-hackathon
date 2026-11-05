@@ -1,0 +1,22 @@
+60 turns x 1 variants on fireworks:accounts/vishakha-d933-0nmp64/models/muse-starter-sl-codepraxis-muse-v1#accounts/vishakha-d933-0nmp64/deployments/eqb76xt9 -> prompts/results/v1_optimized.jsonl
+  interview optimized move=PROBE ref=QUESTION_DONE ok=True same=False 10.5s
+  interview optimized move=PROBE ref=PROBE ok=True same=True 9.3s
+  interview optimized move=QUESTION_DONE ref=HINT ok=True same=False 26.9s
+  interview optimized move=QUESTION_DONE ref=QUESTION_DONE ok=True same=True 28.3s
+  interview optimized move=FOLLOW_UP ref=FOLLOW_UP ok=True same=True 6.1s
+  interview optimized move=QUESTION_DONE ref=FOLLOW_UP ok=True same=False 12.0s
+  interview optimized move=FOLLOW_UP ref=FOLLOW_UP ok=True same=True 4.8s
+  interview optimized move=PROBE ref=PROBE ok=True same=True 8.6s
+  interview optimized move=FOLLOW_UP ref=FOLLOW_UP ok=True same=True 4.1s
+  interview optimized move=FOLLOW_UP ref=FOLLOW_UP ok=True same=True 5.9s
+  interview optimized move=PROBE ref=PROBE ok=True same=True 10.1s
+  interview optimized move=PROBE ref=PROBE ok=True same=True 9.3s
+  interview optimized move=HINT ref=HINT ok=True same=True 5.4s
+  interview optimized move=FOLLOW_UP ref=FOLLOW_UP ok=True same=True 4.1s
+  interview optimized move=PROBE ref=PROBE ok=True same=True 7.4s
+  interview optimized move=PROBE ref=PROBE ok=True same=True 9.7s
+  interview optimized move=PROBE ref=PROBE ok=True same=True 9.4s
+  interview optimized move=FOLLOW_UP ref=PROBE ok=True same=False 4.8s
+  interview optimized move=PROBE ref=PROBE ok=True same=True 9.5s
+  interview optimized move=FOLLOW_UP ref=FOLLOW_UP ok=True same=True 4.3s
+  assess    optimized move=FOLLOW_UP ref=FOLLOW_UP ok=True same=True 3.8s

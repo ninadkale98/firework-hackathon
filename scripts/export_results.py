@@ -19,7 +19,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from distill import store  # noqa: E402
 
-NEW_MODELS = ("muse-glimmer-base", "muse-glimmer-tuned")
+NEW_MODELS = ("muse-glimmer-base", "muse-glimmer-tuned", "muse-glimmer-tuned-prompt-opt",
+              "muse-glimmer-tuned-prompt-cot", "muse-glimmer-v2-step100")
 
 
 def export(out: Path) -> None:

@@ -31,13 +31,17 @@ from distill.score import bootstrap_ci  # noqa: E402
 
 SAMPLE = 300
 TASKS = ["interview", "assess", "study"]
-MODELS = [REFERENCE, "deepseek-v4.1-flash", "qwen3.5-9b", "muse-glimmer-base", "muse-glimmer-tuned"]
+MODELS = [REFERENCE, "deepseek-v4.1-flash", "qwen3.5-9b", "muse-glimmer-base", "muse-glimmer-tuned",
+          "muse-glimmer-tuned-prompt-opt", "muse-glimmer-tuned-prompt-cot", "muse-glimmer-v2-step100"]
 LABEL = {
     REFERENCE: "Opus 5 (reference)",
     "deepseek-v4.1-flash": "DeepSeek V4.1 Flash (teacher)",
     "qwen3.5-9b": "Qwen3.5-9B base",
     "muse-glimmer-base": "Muse Glimmer 30B base",
     "muse-glimmer-tuned": "Muse Glimmer 30B tuned",
+    "muse-glimmer-tuned-prompt-opt": "Muse tuned + optimized prompt",
+    "muse-glimmer-tuned-prompt-cot": "Muse tuned + CoT prompt",
+    "muse-glimmer-v2-step100": "Muse v2 (step 100)",
 }
 
 

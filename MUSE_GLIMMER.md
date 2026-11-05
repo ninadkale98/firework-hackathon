@@ -2,7 +2,7 @@
 
 A second student, trained alongside the Qwen3.5-9B run: **Muse Glimmer 30B + LoRA**, fine-tuned on the same training export and evaluated on the same frozen test set with the leaderboard's metrics. This file records what was done, how, the results, and how to reproduce or extend it.
 
-**Status: final.** Training done, model saved, evaluation complete on the 300-turn shared sample: every valid answer of every model judged (base Muse's 16 invalid answers have no move and are not judged, as on the leaderboard). DPO and a v2 SFT were investigated but not run; see [Open items](#7-open-items).
+**Status:** v1 evaluation final; prompt tuning and v2-step100 added in §1b (judge partial, account suspended). Training done, model saved, evaluation complete on the 300-turn shared sample: every valid answer of every model judged (base Muse's 16 invalid answers have no move and are not judged, as on the leaderboard). DPO and a v2 SFT were investigated but not run; see [Open items](#7-open-items).
 
 ## 1. Results in one table
 
@@ -41,6 +41,24 @@ Judge columns cover all 300 turns for every model except base Muse (284: its 16 
 - **Still behind the teacher on judged quality:** win/tie vs Opus 41% vs 58%, judge 4.25 vs 4.36.
 - **One regression: Assess grading.** Same grade as Opus 94% (base, n=31) → 82% (tuned, n=40); teacher 97%. Small n, and the tuned model closes more stages, but this is the clearest next target (more Assess stage-closing rows, or DPO on grading).
 - Versus the other student, **Qwen3.5-9B base**, tuned Muse is far ahead on every column; compare with Qwen3.5-9B *tuned* once that run is evaluated with the same judge.
+
+## 1b. Prompt tuning on v1, and v2 at step 100 (2026-11-02 evening)
+
+Same 300 turns, same scoring. The production prompt is unchanged; the copies are built by [prompts/variants.py](prompts/variants.py) (originals kept word for word, plus a one-line job statement, an ordered move-choice guide aimed at v1's measured confusions, three few-shot examples from training turns on non-test questions, and an output self-check; `cot` adds a short scratchpad before the JSON and therefore runs without strict schema output). Techniques and next steps: [prompts/PROMPT_TECHNIQUES.md](prompts/PROMPT_TECHNIQUES.md).
+
+| Model | Valid | Same move | Interview | Assess | Study | Same grade | Judge 1–5 | Win/tie vs Opus |
+|---|---|---|---|---|---|---|---|---|
+| v1, original prompt | 100% | 65% | 65% | 78% | 53% | 82% (n=40) | 4.25 | 41% |
+| **v1 + optimized prompt** | **100%** | **70%** | **74%** | **81%** | **56%** | 76% (n=38) | 4.16² | 37%² |
+| v1 + CoT prompt | 97% | 69% | 70% | 82% | 55% | 86% (n=36) | 4.18² | 37%² |
+| v2, step 100 of 300 | 100% | 56% | 62% | 56% | 47% | 90% (n=41) | – | – |
+
+² Judge on 152 of 300 turns: the Fireworks account was suspended (spending limit) mid-judge. Paired with v1 on those same 152 turns the judge sees no difference (judge 4.20 vs 4.16 / 4.18; win/tie 36% vs 37%).
+
+**Paired vs v1 (exact McNemar, same turns):** optimized prompt same move v1-only 15 vs optimized-only 30, **p = 0.036**; CoT 21 vs 32, p = 0.17; judge ≥ 4: no difference for either (p = 1).
+
+**Reading:** the optimized prompt is a free, significant gain in move choice (65% → 70%, now above the teacher's 64%), with judged quality unchanged. CoT is similar but not significant and loses 3 points of valid output (no strict schema). v2 at step 100 (a third of its schedule, LR still high) is below v1; it was stopped there. Its model `codepraxis-muse-v2-step100` is saved.
+
 
 ## 2. The model
 

@@ -26,6 +26,7 @@ from openai import AsyncOpenAI  # noqa: E402
 from distill import store  # noqa: E402
 from distill.models import FIREWORKS_URL, MODELS  # noqa: E402
 from distill.runs import stratified  # noqa: E402
+from prompts.variants import build, parse  # noqa: E402
 
 DEFAULT_NAME = "muse-glimmer-tuned"
 
@@ -53,11 +54,9 @@ async def main(a) -> None:
             if store.has_run(conn, rec["id"], NAME):
                 done["cached"] += 1
                 return
-            system = "\n\n".join(b["text"] for b in rec["system"])
-            kw = dict(model=spec.model, max_tokens=a.max_tokens, temperature=0,
-                      messages=[{"role": "system", "content": system},
-                                {"role": "user", "content": rec["message"]}])
-            if not a.no_schema:
+            msgs, strict = build(rec, a.variant)
+            kw = dict(model=spec.model, max_tokens=a.max_tokens, temperature=0, messages=msgs)
+            if strict and not a.no_schema:
                 kw["response_format"] = {"type": "json_schema", "json_schema": {
                     "name": "move", "strict": True, "schema": wrapped(rec["schema"])}}
             t0 = time.time()
@@ -72,17 +71,15 @@ async def main(a) -> None:
                         return
                     await asyncio.sleep(5 * 2 ** attempt)
             raw = out.choices[0].message.content or ""
-            try:
-                move = json.loads(raw).get("move_object")
-            except Exception:
-                move = None
+            move = parse(raw, a.variant)
             finish = out.choices[0].finish_reason
             store.put_run(conn, rec["id"], NAME, {
                 "model": spec.model, "stop_reason": "end_turn" if finish == "stop" else finish,
-                "raw": raw, "move": move, "latency_ms": int((time.time() - t0) * 1000),
+                "raw": json.dumps({"move_object": move}) if (move and a.variant == "cot") else raw, "move": move, "latency_ms": int((time.time() - t0) * 1000),
                 "tokens": {"in": out.usage.prompt_tokens, "out": out.usage.completion_tokens,
                            "cache_read": 0},
-                "schema_mode": "none" if a.no_schema else "json_schema_strict",
+                "schema_mode": "json_schema_strict" if (strict and not a.no_schema) else "none",
+                "prompt_variant": a.variant,
             })
             store.log_spend(conn, "fireworks", NAME, f"baseline:{a.split}",
                             out.usage.prompt_tokens, out.usage.completion_tokens, None)
@@ -103,4 +100,5 @@ if __name__ == "__main__":
     ap.add_argument("--concurrency", type=int, default=8)
     ap.add_argument("--max-tokens", type=int, default=4096)
     ap.add_argument("--no-schema", action="store_true")
+    ap.add_argument("--variant", default="original", choices=["original", "optimized", "cot"], help="prompts/variants.py")
     asyncio.run(main(ap.parse_args()))

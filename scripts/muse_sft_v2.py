@@ -714,6 +714,8 @@ def cmd_launch_serverless(args: argparse.Namespace) -> int:
                 )
                 opt = training_client.optim_step(adam, emit_grad_norm_metrics=True).result()
                 step += 1
+                if args.ckpt_every and step % args.ckpt_every == 0 and step < total_steps:
+                    _save_and_promote(training_client, service, account, args.run_id, step)
                 metrics = dict(getattr(fb, "metrics", None) or {})
                 tokens = metrics.get("response_tokens") or metrics.get("num_loss_tokens") or 1.0
                 loss = metrics.get("loss:sum", 0.0) / max(float(tokens), 1.0)
@@ -759,6 +761,28 @@ def cmd_launch_serverless(args: argparse.Namespace) -> int:
             flush=True,
         )
     return 0
+
+
+def _save_and_promote(training_client, service, account: str, run_id: str, step: int) -> None:
+    """Save a sampler checkpoint and promote it to a model, so a stopped run keeps it."""
+    from fireworks.training.sdk import FireworksClient
+
+    label = f"ckpt-step{step}"
+    try:
+        training_client.save_weights_for_sampler(label).result()
+        fw = FireworksClient(api_key=os.environ["FIREWORKS_API_KEY"],
+                             base_url=os.environ.get("FIREWORKS_BASE_URL", "https://api.fireworks.ai"))
+        rows = [r for r in fw.list_training_session_checkpoints(service.training_session_name)
+                if r.get("promotable") and label in (r.get("checkpointName") or r.get("name") or "")]
+        if not rows:
+            print(json.dumps({"checkpoint": label, "promoted_model": None, "note": "not found"}), flush=True)
+            return
+        target = max(rows, key=lambda r: r.get("createTime", ""))
+        model_id = f"{run_id}-step{step}"
+        fw.promote_session_checkpoint(name=target["name"], output_model_id=model_id, base_model=BASE_MODEL)
+        print(json.dumps({"checkpoint": label, "promoted_model": f"accounts/{account}/models/{model_id}"}), flush=True)
+    except Exception as exc:  # a failed save must not kill training
+        print(json.dumps({"checkpoint": label, "error": repr(exc)[:300]}), flush=True)
 
 
 def _promote_tuned(service, account: str, run_id: str) -> str | None:
@@ -807,6 +831,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         s.add_argument("--epochs", type=int, default=1)
         s.add_argument("--learning-rate", type=float, default=1e-4)
         s.add_argument("--warmup-steps", type=int, default=20)
+        s.add_argument("--ckpt-every", type=int, default=0, help="Save and promote a checkpoint every N steps.")
         s.add_argument("--max-context-length", type=int, default=4096)
         s.add_argument("--batch-size", type=int, default=16)
         s.add_argument("--max-seq-len", type=int, default=2048)

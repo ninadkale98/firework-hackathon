@@ -1,0 +1,29 @@
+[
+  {
+    "record_id": "9577fa703bcf-t1-c0",
+    "move": "FOLLOW_UP",
+    "stage": null,
+    "time_left_s": null,
+    "learner": "`cargo test` is tripping over `tests/words.rs`: it calls `textops::normalize`, but `normalize` is private, so the integration test won’t compile. `--lib` missed it because it only runs unit tests, and `--test flow` missed it because it runs a different integration test file. The bug is in the code/API surface, not the test; I’d make `normalize` public or remove that external test. To run only `total_of_lines`, use `cargo test --test flow total_of_lines`.",
+    "why": "The answer describes a different package (tests/words.rs, private `normalize`); none of the three parts of this question about the `numbers` package were addressed, and the exact-filter part was answered with a plain substring filter.",
+    "reply": "That is the earlier package, not this one. For the `numbers` package as it stands: what does plain `cargo test` fail on, why did `cargo test --lib` and `cargo test --test flow` both miss it, and is the bug in the code or somewhere else? Then the exact command for `total_of_lines` alone."
+  },
+  {
+    "record_id": "3b3886ee6ac5-t6-c0",
+    "move": "PROBE",
+    "stage": null,
+    "time_left_s": null,
+    "learner": "`From<Meters> for f64` is okay because one side is local (`Meters`), but `Display for Vec<Meters>` is not since both the trait and the type are foreign.",
+    "why": "Stage complete. Graded strong: Only (b) compiles; (a) and (c) break the orphan/coherence rule because two crates could both claim the same Display behaviour; fix (a) with a local newtype wrapping the vector. Follow-up: `From<Meters> for f64` is fine because one side is local (Meters), while `Display for Vec<Meters>` is not, since both trait and type are foreign.",
+    "reply": "Both branches of that example implement `Display`: why is `describe` rejected? Fix it while keeping `-> impl Display`. And `show` takes `impl Display` yet accepts `\"text\"` and `7` in the same program: why is argument position different?"
+  },
+  {
+    "record_id": "c28c894a8a13-t1-c0",
+    "move": "FOLLOW_UP",
+    "stage": null,
+    "time_left_s": null,
+    "learner": "`fn items_mut(&mut self) -> &mut Vec<i32>` — needs `&mut Buffer`\n`fn limit(&self) -> usize` — needs `&Buffer` or `&mut Buffer`\n`fn add(&mut self, value: u32)` — needs `&mut Tally`\n`fn into_report(self) -> String` — needs owned `Tally`",
+    "why": "Only three signatures given (no `new`, no `average`), caller needs stated only as receiver types, and nothing at all on the file's last line or a guard for it.",
+    "reply": "You listed `add` and `into_report`. Give me the other two signatures as well, and then tell me what happens on the file's last line, and how you would guard it."
+  }
+]

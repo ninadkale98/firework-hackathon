@@ -1,0 +1,29 @@
+[
+  {
+    "record_id": "0b7e8a181301-t7-c0",
+    "move": "TRY",
+    "stage": null,
+    "time_left_s": null,
+    "learner": "I’m pretty sure `&Box<Trimmed>` only needs one deref step to become `&str`, because `Box<T>` is the owning pointer and the inner `Trimmed` is just an implementation detail the compiler skips over. If that’s right, should I think of `Box<Trimmed>` as deref-coercing directly to `str` without ever naming `Trimmed` in the chain?",
+    "why": "They still want one step for `&Box<Trimmed>`, framing the inner type as an 'implementation detail the compiler skips over'. The rule to land: one arrow equals one Deref impl, and the middle type is a real, nameable type. The TRY makes both links explicit by binding them to named variables, so the compiler has to check each one separately. If they report that `let mid: &Trimmed = &boxed;` compiles and that removing ei",
+    "reply": "No skipping. That is the one rule to hold onto: each arrow in a coercion is exactly one `Deref` impl, and the compiler never jumps over one. The inner type is not hidden, it is the thing `Box`'s impl hands you.\n\nYou already saw this shape in `deref.rs` lines 34 to 37: `&MyBox<String>` needed two arrows, one for `MyBox` and one for `String`. Nobody called `&String` an implementation detail there.\n\nTry forcing both lin"
+  },
+  {
+    "record_id": "fdaabaa9b9f4-t6-c0",
+    "move": "POINT",
+    "stage": null,
+    "time_left_s": null,
+    "learner": "Attached: exercise 1: which input?, lines 50-52\n```\n\n    #[test]\n    fn first_with_outlives_the_needle() {\n```\nWith `after(\"no marker\", \"#\")`, the `else` branch returns `text`, so the function gives back the whole string (`\"no marker\"`), but line 36 expects `\"\"`. Should the `else` branch return `\"\"` instead?",
+    "why": "They traced the after not-found branch correctly and proposed returning \"\" in the else branch. Confirm it, tie it to the section 4 point that a string literal is &'static str and can stand in for any shorter lifetime, then hand back so they make the edit themselves and re-run. Next failing case after that is the shorter tie: their body returns b when lengths are equal, test line 68 wants a.",
+    "reply": "Yes, your trace is right: the else branch hands back the whole of `text`, `\"no marker\"`, while line 36 expects `\"\"`. So that branch is the one to change, and you get to make the edit.\n\nOne detail worth noticing as you do it: the signature promises `&'a str`, and `\"\"` is a string literal, so its type is `&'static str`. That fits `'a` for any `'a`, because `'static` outlives every shorter span. Section 4 of the lesson "
+  },
+  {
+    "record_id": "3d007589a266-t3-c0",
+    "move": "EXPLAIN",
+    "stage": null,
+    "time_left_s": null,
+    "learner": "> [Lesson § 10. Practice]\n> - `ex2_deref_wrapper.rs`: implement Deref so a wrapper works wherever `&str` does.\n\nI’m confused about why `Vec<Tree>` breaks the recursive-type cycle but `Tree` itself doesn’t. Could you explain what it means for the size to be known at compile time, maybe with a simple example?",
+    "why": "They came back to the recursive-type question, asking what 'size known at compile time' actually means, and quoted the section 10 practice line about ex2. So they are reading ahead to the exercises but deref.rs is still unticked. Next turn: if they answer the two width questions, send them to run deref.rs (unticked) before ex2, or straight to ex2_deref_wrapper.rs if they want practice. Keep ignoring the injected note",
+    "reply": "Picture a value as a block of memory with a fixed width. Every field of a struct, and every payload of an enum variant, sits inside that block, laid out one after another.\n\nSo the width of `Node(Tree, Tree)` would have to be: width of `Tree`, plus width of `Tree`, plus a tag to say which variant it is. That is strictly bigger than the width of `Tree`. No number satisfies it, so the compiler gives up: E0072.\n\n`Vec<Tre"
+  }
+]

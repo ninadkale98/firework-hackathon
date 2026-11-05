@@ -39,3 +39,5 @@ Approved by user, 2026-11-02: "i have 50$ credit, lets do it"
 - Eval: tuned + base Muse answered the 300-turn shared sample (scripts/run_tuned.py). Base deployment muse-glimmer-base-eval deleted after the run; tuned eqb76xt9 parked at 0 replicas. Judge: DeepSeek V4.1 Flash (scripts/judge_ds.py, kinds *_ds).
 - Eval final: judge coverage complete (base Muse 284 = its valid answers). DeepSeek judge total $13.10. Report: results/muse_eval/REPORT_deepseek_judge.md
 - DPO: serverless dpo_loop rejects warm starts. Probed load_adapter(muse-starter-sl-codepraxis-muse-v1) in a serverless session: 4 attempts, all 'Adapter could not be loaded from durable storage'. Sessions deleted. Route A not possible.
+- 15:30 Testing deployments for the user (do not delete): eqb76xt9 (tuned v1) and muse-glimmer-base (base), 1x H200 each, min 0 / max 1 (scale to zero after 1 h idle).
+- 18:26 Fireworks account suspended (412, spending limit / billing). Judge stopped: prompt-opt and prompt-cot judged on 152/300, v2-step100 not judged. Rules scores complete for all.

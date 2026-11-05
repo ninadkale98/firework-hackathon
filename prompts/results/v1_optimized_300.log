@@ -1,0 +1,14 @@
+300 records -> accounts/vishakha-d933-0nmp64/models/muse-starter-sl-codepraxis-muse-v1#accounts/vishakha-d933-0nmp64/deployments/eqb76xt9
+  25/300 errors=0
+  50/300 errors=0
+  75/300 errors=0
+  100/300 errors=0
+  125/300 errors=0
+  150/300 errors=0
+  175/300 errors=0
+  200/300 errors=0
+  225/300 errors=0
+  250/300 errors=0
+  275/300 errors=0
+  300/300 errors=0
+muse-glimmer-tuned-prompt-opt: {'ok': 300}

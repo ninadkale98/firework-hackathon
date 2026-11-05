@@ -67,6 +67,17 @@ MODELS: Dict[str, ModelSpec] = {spec.name: spec for spec in (
                         "accounts/vishakha-d933-0nmp64/models/muse-starter-sl-codepraxis-muse-v1"
                         "#accounts/vishakha-d933-0nmp64/deployments/eqb76xt9"),
               None, None, "on-demand H200 $8/h"),
+    # v1 with the prompt copies in prompts/variants.py (same deployment as muse-glimmer-tuned).
+    ModelSpec("muse-glimmer-tuned-prompt-opt", "fireworks",
+              "accounts/vishakha-d933-0nmp64/models/muse-starter-sl-codepraxis-muse-v1"
+              "#accounts/vishakha-d933-0nmp64/deployments/eqb76xt9", None, None, "v1 + optimized prompt"),
+    ModelSpec("muse-glimmer-tuned-prompt-cot", "fireworks",
+              "accounts/vishakha-d933-0nmp64/models/muse-starter-sl-codepraxis-muse-v1"
+              "#accounts/vishakha-d933-0nmp64/deployments/eqb76xt9", None, None, "v1 + chain-of-thought prompt"),
+    # v2 SFT (LR decay, train+val, Assess grading turns x2), checkpoint at step 100 of 300.
+    ModelSpec("muse-glimmer-v2-step100", "fireworks",
+              "accounts/vishakha-d933-0nmp64/models/codepraxis-muse-v2-step100"
+              "#accounts/vishakha-d933-0nmp64/deployments/j6zbfgxf", None, None, "on-demand H200 $8/h"),
     # Base Muse Glimmer 30B, the tuned model's starting point (no serverless inference).
     ModelSpec("muse-glimmer-base", "fireworks",
               os.getenv("DISTILL_MUSE_BASE_DEPLOYMENT",
